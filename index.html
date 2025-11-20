@@ -103,6 +103,7 @@
       gap: 12px;
       align-items: center;
       margin-bottom: 16px;
+      flex-wrap: wrap;
     }
 
     .record-btn {
@@ -139,10 +140,40 @@
       50% { opacity: 0.7; }
     }
 
+    .clear-btn {
+      padding: 12px 20px;
+      background: #e2e8f0;
+      color: #2d3748;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .clear-btn:hover {
+      background: #cbd5e0;
+    }
+
     .recording-status {
       font-size: 14px;
       color: #4a5568;
       font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .recording-timer {
+      background: #fed7d7;
+      color: #c53030;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'Courier New', monospace;
     }
 
     .mic-notice {
@@ -156,6 +187,13 @@
       display: none;
     }
 
+    .transcript-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
     .transcript-input {
       flex: 1;
       width: 100%;
@@ -166,13 +204,62 @@
       resize: none;
       font-family: inherit;
       line-height: 1.6;
-      transition: border-color 0.2s;
-      min-height: 200px;
+      transition: all 0.2s;
+      min-height: 150px;
     }
 
     .transcript-input:focus {
       outline: none;
       border-color: #667eea;
+    }
+
+    .transcript-input.recording-active {
+      border-color: #48bb78;
+      background: #f0fff4;
+    }
+
+    .live-caption {
+      background: #edf2f7;
+      border: 2px solid #cbd5e0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 12px;
+      font-size: 14px;
+      color: #2d3748;
+      font-style: italic;
+      min-height: 60px;
+      display: none;
+      animation: fadeIn 0.3s;
+    }
+
+    .live-caption.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .live-caption-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #718096;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .live-caption-text {
+      color: #1a202c;
+      line-height: 1.5;
+    }
+
+    .word-count {
+      font-size: 12px;
+      color: #a0aec0;
+      margin-top: 8px;
+      text-align: right;
     }
 
     .generate-btn {
@@ -336,9 +423,22 @@
     <h1 id="app-title">Auto Note Taker</h1>
     <p class="subtitle">Record or paste your transcript and let AI organize your notes</p>
     <div class="input-section"><label for="note-title">Meeting Title</label> <input type="text" id="note-title" class="title-input" placeholder="e.g., Team Standup - Jan 15">
-     <div class="record-controls"><button id="record-btn" class="record-btn">🎤 Start Recording</button> <span id="recording-status" class="recording-status"></span>
+     <div class="record-controls"><button id="record-btn" class="record-btn">🎤 Start Recording</button> <button id="clear-btn" class="clear-btn">Clear</button> <span id="recording-status" class="recording-status"></span>
      </div>
-     <div id="mic-notice" class="mic-notice"></div><label for="transcript">Transcript</label> <textarea id="transcript" class="transcript-input" placeholder="Paste your meeting transcript here... or use the microphone to record"></textarea> <button id="generate-btn" class="generate-btn">Generate Notes</button>
+     <div id="mic-notice" class="mic-notice"></div><label for="transcript">Transcript</label>
+     <div class="transcript-container"><textarea id="transcript" class="transcript-input" placeholder="Paste your meeting transcript here... or use the microphone to record"></textarea>
+      <div id="live-caption" class="live-caption">
+       <div class="live-caption-label">
+        🎙️ Live Caption
+       </div>
+       <div id="live-caption-text" class="live-caption-text">
+        Listening...
+       </div>
+      </div>
+      <div id="word-count" class="word-count">
+       0 words
+      </div>
+     </div><button id="generate-btn" class="generate-btn">Generate Notes</button>
     </div>
    </div>
    <div class="notes-panel">
@@ -356,6 +456,8 @@
     let recognition = null;
     let isRecording = false;
     let currentTranscript = '';
+    let recordingStartTime = null;
+    let timerInterval = null;
     
     const defaultConfig = {
       app_title: "Auto Note Taker",
@@ -407,6 +509,25 @@
       ]);
     }
 
+    // Update word count
+    function updateWordCount() {
+      const text = document.getElementById('transcript').value;
+      const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+      document.getElementById('word-count').textContent = `${words} word${words !== 1 ? 's' : ''}`;
+    }
+
+    // Update recording timer
+    function updateTimer() {
+      if (!recordingStartTime) return;
+      const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+      const timerEl = document.querySelector('.recording-timer');
+      if (timerEl) {
+        timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      }
+    }
+
     // Initialize speech recognition
     function initSpeechRecognition() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -421,13 +542,25 @@
       recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = 'en-US';
+      recognition.maxAlternatives = 1;
 
       recognition.onstart = () => {
         isRecording = true;
+        recordingStartTime = Date.now();
         const recordBtn = document.getElementById('record-btn');
         recordBtn.textContent = '⏹️ Stop Recording';
         recordBtn.classList.add('recording');
-        document.getElementById('recording-status').textContent = 'Recording...';
+        
+        const statusEl = document.getElementById('recording-status');
+        statusEl.innerHTML = 'Recording... <span class="recording-timer">0:00</span>';
+        
+        timerInterval = setInterval(updateTimer, 1000);
+        
+        const liveCaption = document.getElementById('live-caption');
+        liveCaption.classList.add('active');
+        
+        const textarea = document.getElementById('transcript');
+        textarea.classList.add('recording-active');
       };
 
       recognition.onresult = (event) => {
@@ -447,10 +580,15 @@
           currentTranscript += finalTranscript;
           const textarea = document.getElementById('transcript');
           textarea.value = currentTranscript;
+          updateWordCount();
         }
 
+        // Update live caption with interim results
+        const liveCaptionText = document.getElementById('live-caption-text');
         if (interimTranscript) {
-          document.getElementById('recording-status').textContent = `Recording... "${interimTranscript}"`;
+          liveCaptionText.textContent = interimTranscript;
+        } else if (finalTranscript) {
+          liveCaptionText.textContent = finalTranscript.trim();
         }
       };
 
@@ -458,9 +596,11 @@
         console.error('Speech recognition error:', event.error);
         
         if (event.error === 'not-allowed') {
-          showNotice('🎤 Microphone access was denied. Please allow microphone access and try again.', true);
+          showNotice('🎤 Microphone access was denied. Please allow microphone access in your browser settings and try again.', true);
         } else if (event.error === 'no-speech') {
-          showNotice('No speech detected. Please try speaking again.', false);
+          showNotice('No speech detected. Please speak closer to your microphone.', false);
+        } else if (event.error === 'aborted') {
+          // Silent error, user stopped recording
         } else {
           showNotice(`Recording error: ${event.error}. This feature may not work in this environment.`, true);
         }
@@ -518,13 +658,38 @@
 
     function stopRecording() {
       isRecording = false;
+      recordingStartTime = null;
+      
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      
       if (recognition) {
         recognition.stop();
       }
+      
       const recordBtn = document.getElementById('record-btn');
       recordBtn.textContent = '🎤 Start Recording';
       recordBtn.classList.remove('recording');
+      
       document.getElementById('recording-status').textContent = '';
+      
+      const liveCaption = document.getElementById('live-caption');
+      liveCaption.classList.remove('active');
+      
+      const textarea = document.getElementById('transcript');
+      textarea.classList.remove('recording-active');
+    }
+
+    function clearTranscript() {
+      if (isRecording) {
+        stopRecording();
+      }
+      document.getElementById('transcript').value = '';
+      currentTranscript = '';
+      updateWordCount();
+      document.getElementById('live-caption-text').textContent = 'Listening...';
     }
 
     // Initialize SDKs
@@ -547,6 +712,12 @@
 
       // Initialize speech recognition
       initSpeechRecognition();
+      
+      // Initialize word count
+      updateWordCount();
+      
+      // Add input listener for word count
+      document.getElementById('transcript').addEventListener('input', updateWordCount);
     }
 
     // Process transcript into notes with auto-formatting
@@ -740,6 +911,7 @@
         document.getElementById('note-title').value = '';
         document.getElementById('transcript').value = '';
         currentTranscript = '';
+        updateWordCount();
         showToast('✓ Notes generated successfully!', 'success');
       } else {
         showToast('Failed to save notes. Please try again.', 'error');
@@ -766,10 +938,11 @@
 
     // Event listeners
     document.getElementById('record-btn').addEventListener('click', toggleRecording);
+    document.getElementById('clear-btn').addEventListener('click', clearTranscript);
     document.getElementById('generate-btn').addEventListener('click', handleGenerate);
 
     // Initialize on load
     init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a19285ff2aa6cda',t:'MTc2MzY1NDQwMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a1939b8d54e6cda',t:'MTc2MzY1NTExMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
