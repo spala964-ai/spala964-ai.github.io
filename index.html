@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Auto Note Taker</title>
+  <title>3D MMO RPG – Infinite Progression</title>
   <script src="/_sdk/data_sdk.js"></script>
   <script src="/_sdk/element_sdk.js"></script>
   <style>
@@ -11,938 +11,465 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #e0e0e0;
       overflow: hidden;
-    }
-
-    html {
       height: 100%;
     }
+    html { height: 100%; }
+    #game-container { display: flex; height: 100%; position: relative; }
+    #game-world { flex: 1; position: relative; background: linear-gradient(180deg, #0f3460 0%, #1a1a2e 100%); overflow: hidden; }
+    canvas { display: block; width: 100%; height: 100%; }
+    #ui-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
+    #ui-overlay > * { pointer-events: auto; }
 
-    * {
-      box-sizing: border-box;
-    }
+    /* === All your original beautiful styles remain unchanged === */
+    #top-bar { background: rgba(26,26,46,0.9); padding:15px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #e94560; }
+    #game-title { font-size:24px; font-weight:bold; color:#e94560; text-shadow:0 0 10px rgba(233,69,96,0.5); }
+    #player-stats { display:flex; gap:20px; align-items:center; }
+    .stat-item { display:flex; flex-direction:column; gap:4px; }
+    .stat-label { font-size:11px; color:#a0a0a0; text-transform:uppercase; }
+    .stat-value { font-size:16px; font-weight:bold; color:#00d9ff; }
+    .health-bar { width:150px; height:20px; background:rgba(0,0,0,0.5); border-radius:10px; overflow:hidden; border:1px solid #e94560; }
+    .health-fill { height:100%; background:linear-gradient(90deg,#e94560 0%,#ff6b6b 100%); transition:width .3s; }
+    .exp-bar { width:150px; height:8px; background:rgba(0,0,0,0.5); border-radius:4px; overflow:hidden; border:1px solid #00d9ff; }
+    .exp-fill { height:100%; background:linear-gradient(90deg,#00d9ff 0%,#00ff88 100%); transition:width .3s; }
 
-    .container {
-      display: flex;
-      height: 100%;
-      gap: 24px;
-      padding: 24px;
-    }
+    #side-panel { width:320px; background:rgba(22,33,62,0.95); border-left:2px solid #e94560; display:flex; flex-direction:column; overflow-y:auto; }
+    .panel-section { padding:20px; border-bottom:1px solid rgba(233,69,96,0.3); }
+    .panel-title { font-size:18px; font-weight:bold; color:#e94560; margin-bottom:15px; text-transform:uppercase; }
 
-    .input-panel {
-      flex: 1;
-      background: white;
-      border-radius: 16px;
-      padding: 32px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    .equipment-slot { background:rgba(15,52,96,0.6); padding:12px; border-radius:8px; margin-bottom:10px; border:2px solid #0f3460; transition:.3s; }
+    .equipment-slot:hover { border-color:#00d9ff; transform:translateX(5px); }
+    .equipment-name { font-weight:bold; color:#00d9ff; margin-bottom:4px; }
+    .equipment-stats { font-size:12px; color:#a0a0a0; }
 
-    .notes-panel {
-      flex: 1;
-      background: white;
-      border-radius: 16px;
-      padding: 32px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    .inventory-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+    .inventory-item { background:rgba(15,52,96,0.6); padding:10px; border-radius:6px; text-align:center; border:2px solid #0f3460; cursor:pointer; transition:.3s; }
+    .inventory-item:hover { border-color:#00d9ff; transform:scale(1.05); }
 
-    h1 {
-      margin: 0 0 8px 0;
-      font-size: 32px;
-      font-weight: 700;
-      color: #1a202c;
-    }
+    .action-button { background:linear-gradient(135deg,#e94560 0%,#d63447 100%); color:white; border:none; padding:12px 24px; border-radius:6px; font-size:14px; font-weight:bold; cursor:pointer; transition:.3s; text-transform:uppercase; margin-top:10px; width:100%; }
+    .action-button:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(233,69,96,0.4); }
 
-    .subtitle {
-      color: #718096;
-      font-size: 14px;
-      margin-bottom: 24px;
-    }
+    #combat-log { position:absolute; bottom:20px; left:20px; right:340px; background:rgba(26,26,46,0.9); padding:15px; border-radius:8px; border:2px solid #e94560; max-height:150px; overflow-y:auto; }
+    .log-entry { padding:5px 0; font-size:13px; border-bottom:1px solid rgba(233,69,96,0.2); }
+    .log-entry:last-child { border:none; }
+    .log-damage { color:#ff6b6b; }
+    .log-heal { color:#00ff88; }
+    .log-loot { color:#ffd700; }
+    .log-level { color:#00d9ff; font-weight:bold; }
 
-    .input-section {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
+    #monster-info { position:absolute; top:100px; left:50%; transform:translateX(-50%); background:rgba(26,26,46,0.95); padding:20px 30px; border-radius:10px; border:2px solid #e94560; text-align:center; min-width:250px; display:none; }
+    .monster-name { font-size:20px; font-weight:bold; color:#e94560; margin-bottom:10px; }
+    .monster-level { font-size:14px; color:#00d9ff; margin-bottom:15px; }
+    .monster-health-bar { width:100%; height:25px; background:rgba(0,0,0,0.5); border-radius:12px; overflow:hidden; border:2px solid #e94560; margin-bottom:15px; }
+    .monster-health-fill { height:100%; background:linear-gradient(90deg,#ff6b6b 0%,#e94560 100%); transition:width .3s; }
 
-    label {
-      display: block;
-      font-weight: 600;
-      color: #2d3748;
-      margin-bottom: 8px;
-      font-size: 14px;
-    }
+    .combat-buttons { display:flex; gap:10px; }
+    .combat-button { flex:1; background:linear-gradient(135deg,#00d9ff 0%,#0099cc 100%); color:white; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer; transition:.3s; }
+    .combat-button:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(0,217,255,0.4); }
 
-    .title-input {
-      width: 100%;
-      padding: 12px 16px;
-      border: 2px solid #e2e8f0;
-      border-radius: 8px;
-      font-size: 16px;
-      margin-bottom: 16px;
-      transition: border-color 0.2s;
-      font-family: inherit;
-    }
+    #welcome-screen { position:absolute; inset:0; background:rgba(26,26,46,0.98); display:flex; align-items:center; justify-content:center; z-index:1000; }
+    .welcome-content { background:rgba(22,33,62,0.95); padding:40px; border-radius:15px; border:3px solid #e94560; text-align:center; max-width:400px; }
+    .welcome-title { font-size:32px; font-weight:bold; color:#e94560; margin-bottom:20px; text-shadow:0 0 20px rgba(233,69,96,0.5); }
+    .welcome-message { font-size:16px; color:#a0a0a0; margin-bottom:30px; line-height:1.6; }
+    .name-input { width:100%; padding:15px; background:rgba(15,52,96,0.6); border:2px solid #0f3460; border-radius:8px; color:#e0e0e0; font-size:16px; margin-bottom:20px; box-sizing:border-box; }
+    .name-input:focus { outline:none; border-color:#00d9ff; }
+    .start-button { background:linear-gradient(135deg,#e94560 0%,#d63447 100%); color:white; border:none; padding:15px 40px; border-radius:8px; font-size:18px; font-weight:bold; cursor:pointer; transition:.3s; text-transform:uppercase; }
+    .start-button:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(233,69,96,0.5); }
 
-    .title-input:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-
-    .record-controls {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-
-    .record-btn {
-      padding: 12px 24px;
-      background: #48bb78;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      white-space: nowrap;
-    }
-
-    .record-btn:hover:not(:disabled) {
-      background: #38a169;
-      transform: translateY(-1px);
-    }
-
-    .record-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .record-btn.recording {
-      background: #f56565;
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-
-    .clear-btn {
-      padding: 12px 20px;
-      background: #e2e8f0;
-      color: #2d3748;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-    }
-
-    .clear-btn:hover {
-      background: #cbd5e0;
-    }
-
-    .recording-status {
-      font-size: 14px;
-      color: #4a5568;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .recording-timer {
-      background: #fed7d7;
-      color: #c53030;
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 700;
-      font-family: 'Courier New', monospace;
-    }
-
-    .mic-notice {
-      background: #fef5e7;
-      border-left: 4px solid #f59e0b;
-      padding: 12px 16px;
-      border-radius: 8px;
-      margin-bottom: 16px;
-      font-size: 13px;
-      color: #92400e;
-      display: none;
-    }
-
-    .transcript-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    .transcript-input {
-      flex: 1;
-      width: 100%;
-      padding: 16px;
-      border: 2px solid #e2e8f0;
-      border-radius: 8px;
-      font-size: 15px;
-      resize: none;
-      font-family: inherit;
-      line-height: 1.6;
-      transition: all 0.2s;
-      min-height: 150px;
-    }
-
-    .transcript-input:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-
-    .transcript-input.recording-active {
-      border-color: #48bb78;
-      background: #f0fff4;
-    }
-
-    .live-caption {
-      background: #edf2f7;
-      border: 2px solid #cbd5e0;
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-top: 12px;
-      font-size: 14px;
-      color: #2d3748;
-      font-style: italic;
-      min-height: 60px;
-      display: none;
-      animation: fadeIn 0.3s;
-    }
-
-    .live-caption.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .live-caption-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      color: #718096;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-    }
-
-    .live-caption-text {
-      color: #1a202c;
-      line-height: 1.5;
-    }
-
-    .word-count {
-      font-size: 12px;
-      color: #a0aec0;
-      margin-top: 8px;
-      text-align: right;
-    }
-
-    .generate-btn {
-      margin-top: 16px;
-      padding: 16px 32px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      font-family: inherit;
-    }
-
-    .generate-btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-    }
-
-    .generate-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .notes-list {
-      flex: 1;
-      overflow-y: auto;
-      margin-top: 16px;
-      min-height: 0;
-    }
-
-    .note-card {
-      background: #f7fafc;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 16px;
-      border-left: 4px solid #667eea;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .note-card:hover {
-      transform: translateX(4px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .note-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: start;
-      margin-bottom: 12px;
-    }
-
-    .note-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #1a202c;
-      margin: 0;
-    }
-
-    .note-date {
-      font-size: 12px;
-      color: #a0aec0;
-    }
-
-    .note-section {
-      margin-top: 12px;
-    }
-
-    .section-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: #667eea;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-    }
-
-    .bullet-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .bullet-list li {
-      padding-left: 20px;
-      position: relative;
-      margin-bottom: 6px;
-      color: #4a5568;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .bullet-list li:before {
-      content: "•";
-      position: absolute;
-      left: 6px;
-      color: #667eea;
-      font-weight: bold;
-    }
-
-    .action-item {
-      background: #fef5e7;
-      border-left: 3px solid #f59e0b;
-      padding: 8px 12px;
-      margin-bottom: 6px;
-      border-radius: 4px;
-      font-size: 14px;
-      color: #92400e;
-    }
-
-    .delete-btn {
-      background: #fc8181;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      cursor: pointer;
-      transition: background 0.2s;
-      font-family: inherit;
-    }
-
-    .delete-btn:hover {
-      background: #f56565;
-    }
-
-    .empty-state {
-      text-align: center;
-      color: #a0aec0;
-      padding: 60px 20px;
-      font-size: 16px;
-    }
-
-    .loading {
-      opacity: 0.6;
-      pointer-events: none;
-    }
-
-    @media (max-width: 968px) {
-      .container {
-        flex-direction: column;
-        overflow-y: auto;
-        height: auto;
-        min-height: 100%;
-      }
-
-      .input-panel, .notes-panel {
-        flex: none;
-        min-height: 400px;
-      }
-    }
+    .toast { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,217,255,0.95); color:#1a1a2e; padding:20px 40px; border-radius:10px; font-size:18px; font-weight:bold; z-index:2000; animation:fadeInOut 2s; }
+    @keyframes fadeInOut { 0%,100%{opacity:0} 10%,90%{opacity:1} }
   </style>
   <style>@view-transition { navigation: auto; }</style>
-  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
  </head>
  <body>
-  <div class="container">
-   <div class="input-panel">
-    <h1 id="app-title">Auto Note Taker</h1>
-    <p class="subtitle">Record or paste your transcript and let AI organize your notes</p>
-    <div class="input-section"><label for="note-title">Meeting Title</label> <input type="text" id="note-title" class="title-input" placeholder="e.g., Team Standup - Jan 15">
-     <div class="record-controls"><button id="record-btn" class="record-btn">🎤 Start Recording</button> <button id="clear-btn" class="clear-btn">Clear</button> <span id="recording-status" class="recording-status"></span>
+  <div id="game-container">
+   <div id="game-world">
+    <canvas id="game-canvas"></canvas>
+    <div id="ui-overlay">
+     <div id="top-bar">
+      <div id="game-title">Infinite MMO RPG</div>
+      <div id="player-stats">
+       <div class="stat-item"><div class="stat-label">Level</div><div class="stat-value" id="player-level">1</div></div>
+       <div class="stat-item"><div class="stat-label">Health</div><div class="health-bar"><div class="health-fill" id="health-fill"></div></div></div>
+       <div class="stat-item"><div class="stat-label">Experience</div><div class="exp-bar"><div class="exp-fill" id="exp-fill"></div></div></div>
+       <div class="stat-item"><div class="stat-label">Gold</div><div class="stat-value" id="player-gold">0</div></div>
+      </div>
      </div>
-     <div id="mic-notice" class="mic-notice"></div><label for="transcript">Transcript</label>
-     <div class="transcript-container"><textarea id="transcript" class="transcript-input" placeholder="Paste your meeting transcript here... or use the microphone to record"></textarea>
-      <div id="live-caption" class="live-caption">
-       <div class="live-caption-label">
-        🎙️ Live Caption
-       </div>
-       <div id="live-caption-text" class="live-caption-text">
-        Listening...
-       </div>
+
+     <div id="monster-info">
+      <div class="monster-name" id="monster-name"></div>
+      <div class="monster-level" id="monster-level"></div>
+      <div class="monster-health-bar"><div class="monster-health-fill" id="monster-health-fill"></div></div>
+      <div class="combat-buttons">
+       <button class="combat-button" id="attack-btn">Attack</button>
+       <button class="combat-button" id="flee-btn">Flee</button>
       </div>
-      <div id="word-count" class="word-count">
-       0 words
-      </div>
-     </div><button id="generate-btn" class="generate-btn">Generate Notes</button>
+     </div>
+
+     <div id="combat-log"></div>
     </div>
    </div>
-   <div class="notes-panel">
-    <h1>Your Notes</h1>
-    <p class="subtitle">All your organized meeting notes</p>
-    <div id="notes-list" class="notes-list">
-     <div class="empty-state" id="empty-state">
-      No notes yet. Paste a transcript to get started!
-     </div>
+
+   <div id="side-panel">
+    <div class="panel-section">
+     <div class="panel-title">Equipment</div>
+     <div class="equipment-slot" id="weapon-slot"><div class="equipment-name">Rusty Sword</div><div class="equipment-stats">Damage: 5-10</div></div>
+     <div class="equipment-slot" id="armor-slot"><div class="equipment-name">Cloth Armor</div><div class="equipment-stats">Defense: 2</div></div>
+    </div>
+    <div class="panel-section">
+     <div class="panel-title">Inventory</div>
+     <div class="inventory-grid" id="inventory-grid"></div>
+    </div>
+    <div class="panel-section">
+     <div class="panel-title">Actions</div>
+     <button class="action-button" id="explore-btn">Explore Dungeon</button>
+     <button class="action-button" id="heal-btn">Rest & Heal (50 Gold)</button>
+    </div>
+   </div>
+
+   <div id="welcome-screen">
+    <div class="welcome-content">
+     <div class="welcome-title">Infinite MMO RPG</div>
+     <div class="welcome-message">Welcome, brave soul! Enter your name to begin an endless journey.</div>
+     <input type="text" class="name-input" id="player-name-input" placeholder="Enter your name" maxlength="20">
+     <button class="start-button" id="start-game-btn">Start Adventure</button>
     </div>
    </div>
   </div>
+
   <script>
-    let allNotes = [];
-    let recognition = null;
-    let isRecording = false;
-    let currentTranscript = '';
-    let recordingStartTime = null;
-    let timerInterval = null;
-    
+    // ==================================================================
+    // CONFIG & DATA
+    // ==================================================================
     const defaultConfig = {
-      app_title: "Auto Note Taker",
-      input_placeholder: "Paste your meeting transcript here...",
-      generate_button_text: "Generate Notes",
-      empty_state_text: "No notes yet. Paste a transcript to get started!"
+      game_title: "Infinite MMO RPG",
+      welcome_message: "Welcome, brave soul! Enter your name to begin an endless journey.",
+      background_color: "#1a1a2e",
+      surface_color: "#16213e",
+      text_color: "#e0e0e0",
+      primary_action_color: "#e94560",
+      secondary_action_color: "#00d9ff",
+      font_family: "Segoe UI",
+      font_size: 16
     };
 
-    // Data SDK handler
-    const dataHandler = {
-      onDataChanged(data) {
-        allNotes = data;
-        renderNotes();
-      }
+    let gameState = {
+      playerData: null,
+      currentMonster: null,
+      inCombat: false,
+      gameStarted: false
     };
 
-    // Element SDK implementation
-    async function onConfigChange(config) {
-      const appTitle = config.app_title || defaultConfig.app_title;
-      const inputPlaceholder = config.input_placeholder || defaultConfig.input_placeholder;
-      const generateButtonText = config.generate_button_text || defaultConfig.generate_button_text;
-      const emptyStateText = config.empty_state_text || defaultConfig.empty_state_text;
+    // ==================================================================
+    // INFINITE MONSTER GENERATOR (up to level 1000+)
+    // ==================================================================
+    const MONSTER_BASES = [
+      "Goblin", "Wolf", "Skeleton", "Orc", "Troll", "Demon", "Dragon", "Ancient Beast","Void Lord","Cosmic Horror"
+    ];
+    const MONSTER_TITLES = [
+      "Scout","Warrior","Champion","Lord","King","Emperor","Overlord","God","Titan","Primordial"
+    ];
 
-      document.getElementById('app-title').textContent = appTitle;
-      document.getElementById('transcript').placeholder = inputPlaceholder;
-      document.getElementById('generate-btn').textContent = generateButtonText;
-      
-      const emptyState = document.getElementById('empty-state');
-      if (emptyState) {
-        emptyState.textContent = emptyStateText;
-      }
-    }
+    function generateMonster(playerLevel) {
+      // Base level is around player level ± some randomness
+      const baseLevel = playerLevel + Math.floor(Math.random() * 11) - 3; // can be a bit lower or much higher
+      const level = Math.max(1, baseLevel + Math.floor(playerLevel / 10)); // gets harder faster at high levels
 
-    function mapToCapabilities(config) {
+      const baseIndex = Math.min(Math.floor((level-1) / 100), MONSTER_BASES.length - 1);
+      const titleIndex = Math.min(Math.floor((level-1) / 50), MONSTER_TITLES.length - 1);
+
+      const name = `${MONSTER_TITLES[titleIndex]} ${MONSTER_BASES[baseIndex]}`;
+
+      // Scaling formulas (feel free to tweak)
+      const health = Math.floor(30 * Math.pow(level, 1.5));
+      const damage = Math.floor(3 + level * 2.8);
+      const exp    = Math.floor(15 * Math.pow(level, 1.6));
+      const gold   = Math.floor(10 + level * 15);
+
       return {
-        recolorables: [],
-        borderables: [],
-        fontEditable: undefined,
-        fontSizeable: undefined
+        name,
+        level,
+        health,
+        damage,
+        exp,
+        gold,
+        currentHealth: health
       };
     }
 
-    function mapToEditPanelValues(config) {
-      return new Map([
-        ["app_title", config.app_title || defaultConfig.app_title],
-        ["input_placeholder", config.input_placeholder || defaultConfig.input_placeholder],
-        ["generate_button_text", config.generate_button_text || defaultConfig.generate_button_text],
-        ["empty_state_text", config.empty_state_text || defaultConfig.empty_state_text]
-      ]);
-    }
+    // ==================================================================
+    // WEAPONS & ARMORS – now also infinite
+    // ==================================================================
+    const WEAPON_TIERS = ["Rusty","Bronze","Iron","Steel","Mithril","Adamant","Rune","Dragon","Void","Celestial","Eternal","Infinite"];
+    const ARMOR_TIERS  = ["Cloth","Leather","Chain","Plate","Mithril","Adamant","Rune","Dragon","Void","Celestial","Eternal","Infinite"];
 
-    // Update word count
-    function updateWordCount() {
-      const text = document.getElementById('transcript').value;
-      const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
-      document.getElementById('word-count').textContent = `${words} word${words !== 1 ? 's' : ''}`;
-    }
-
-    // Update recording timer
-    function updateTimer() {
-      if (!recordingStartTime) return;
-      const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
-      const minutes = Math.floor(elapsed / 60);
-      const seconds = elapsed % 60;
-      const timerEl = document.querySelector('.recording-timer');
-      if (timerEl) {
-        timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-      }
-    }
-
-    // Initialize speech recognition
-    function initSpeechRecognition() {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      
-      if (!SpeechRecognition) {
-        showNotice('⚠️ Speech recognition is not supported in this environment. Please paste your transcript instead.', true);
-        document.getElementById('record-btn').disabled = true;
-        return false;
-      }
-
-      recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = 'en-US';
-      recognition.maxAlternatives = 1;
-
-      recognition.onstart = () => {
-        isRecording = true;
-        recordingStartTime = Date.now();
-        const recordBtn = document.getElementById('record-btn');
-        recordBtn.textContent = '⏹️ Stop Recording';
-        recordBtn.classList.add('recording');
-        
-        const statusEl = document.getElementById('recording-status');
-        statusEl.innerHTML = 'Recording... <span class="recording-timer">0:00</span>';
-        
-        timerInterval = setInterval(updateTimer, 1000);
-        
-        const liveCaption = document.getElementById('live-caption');
-        liveCaption.classList.add('active');
-        
-        const textarea = document.getElementById('transcript');
-        textarea.classList.add('recording-active');
+    function getWeaponForLevel(lvl) {
+      const tier = Math.min(Math.floor((lvl-1)/10), WEAPON_TIERS.length-1);
+      const minDmg = 5 + tier*25 + Math.floor(lvl*3);
+      const maxDmg = minDmg + 10 + tier*15 + Math.floor(lvl*2);
+      return {
+        name: `${WEAPON_TIERS[tier]} Blade`,
+        damage: `${minDmg}-${maxDmg}`
       };
+    }
 
-      recognition.onresult = (event) => {
-        let interimTranscript = '';
-        let finalTranscript = '';
-
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript + ' ';
-          } else {
-            interimTranscript += transcript;
-          }
-        }
-
-        if (finalTranscript) {
-          currentTranscript += finalTranscript;
-          const textarea = document.getElementById('transcript');
-          textarea.value = currentTranscript;
-          updateWordCount();
-        }
-
-        // Update live caption with interim results
-        const liveCaptionText = document.getElementById('live-caption-text');
-        if (interimTranscript) {
-          liveCaptionText.textContent = interimTranscript;
-        } else if (finalTranscript) {
-          liveCaptionText.textContent = finalTranscript.trim();
-        }
+    function getArmorForLevel(lvl) {
+      const tier = Math.min(Math.floor((lvl-1)/10), ARMOR_TIERS.length-1);
+      const defense = 2 + tier*12 + Math.floor(lvl*2.5);
+      return {
+        name: `${ARMOR_TIERS[tier]} Armor`,
+        defense
       };
-
-      recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-        
-        if (event.error === 'not-allowed') {
-          showNotice('🎤 Microphone access was denied. Please allow microphone access in your browser settings and try again.', true);
-        } else if (event.error === 'no-speech') {
-          showNotice('No speech detected. Please speak closer to your microphone.', false);
-        } else if (event.error === 'aborted') {
-          // Silent error, user stopped recording
-        } else {
-          showNotice(`Recording error: ${event.error}. This feature may not work in this environment.`, true);
-        }
-        
-        stopRecording();
-      };
-
-      recognition.onend = () => {
-        if (isRecording) {
-          // Restart if still supposed to be recording
-          try {
-            recognition.start();
-          } catch (e) {
-            stopRecording();
-          }
-        }
-      };
-
-      return true;
     }
 
-    function showNotice(message, persistent) {
-      const notice = document.getElementById('mic-notice');
-      notice.textContent = message;
-      notice.style.display = 'block';
-      
-      if (!persistent) {
-        setTimeout(() => {
-          notice.style.display = 'none';
-        }, 5000);
-      }
-    }
+    // ==================================================================
+    // CANVAS STARFIELD BACKGROUND + MONSTER IN COMBAT
+    // ==================================================================
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas(){ canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; }
+    resizeCanvas(); window.addEventListener('resize', resizeCanvas);
 
-    function toggleRecording() {
-      if (!recognition) {
-        showNotice('Speech recognition is not available in this environment.', true);
-        return;
-      }
+    let particles = [], time = 0;
+    for(let i=0;i<150;i++) particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,z:Math.random()*1000,size:Math.random()*2+1,speed:Math.random()*0.5+0.2});
 
-      if (isRecording) {
-        stopRecording();
-      } else {
-        startRecording();
-      }
-    }
+    function animate() {
+      ctx.fillStyle = 'rgba(15,52,96,0.1)';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      time += 0.01;
 
-    function startRecording() {
-      try {
-        currentTranscript = document.getElementById('transcript').value;
-        recognition.start();
-      } catch (e) {
-        showNotice('Could not start recording. Microphone access may be blocked.', true);
-      }
-    }
-
-    function stopRecording() {
-      isRecording = false;
-      recordingStartTime = null;
-      
-      if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-      }
-      
-      if (recognition) {
-        recognition.stop();
-      }
-      
-      const recordBtn = document.getElementById('record-btn');
-      recordBtn.textContent = '🎤 Start Recording';
-      recordBtn.classList.remove('recording');
-      
-      document.getElementById('recording-status').textContent = '';
-      
-      const liveCaption = document.getElementById('live-caption');
-      liveCaption.classList.remove('active');
-      
-      const textarea = document.getElementById('transcript');
-      textarea.classList.remove('recording-active');
-    }
-
-    function clearTranscript() {
-      if (isRecording) {
-        stopRecording();
-      }
-      document.getElementById('transcript').value = '';
-      currentTranscript = '';
-      updateWordCount();
-      document.getElementById('live-caption-text').textContent = 'Listening...';
-    }
-
-    // Initialize SDKs
-    async function init() {
-      if (window.dataSdk) {
-        const result = await window.dataSdk.init(dataHandler);
-        if (!result.isOk) {
-          console.error("Failed to initialize Data SDK");
-        }
-      }
-
-      if (window.elementSdk) {
-        await window.elementSdk.init({
-          defaultConfig,
-          onConfigChange,
-          mapToCapabilities,
-          mapToEditPanelValues
-        });
-      }
-
-      // Initialize speech recognition
-      initSpeechRecognition();
-      
-      // Initialize word count
-      updateWordCount();
-      
-      // Add input listener for word count
-      document.getElementById('transcript').addEventListener('input', updateWordCount);
-    }
-
-    // Process transcript into notes with auto-formatting
-    function processTranscript(transcript) {
-      // Split into sentences for better processing
-      const sentences = transcript
-        .replace(/([.!?])\s+/g, '$1|')
-        .split('|')
-        .map(s => s.trim())
-        .filter(s => s.length > 10);
-      
-      const bullets = [];
-      const actionItems = [];
-      
-      const actionKeywords = [
-        'need to', 'needs to', 'have to', 'has to',
-        'will', 'should', 'must', 'going to',
-        'action item', 'todo', 'to do', 'task',
-        'by friday', 'by monday', 'by tuesday', 'by wednesday', 'by thursday',
-        'by next week', 'by end of', 'deadline',
-        'follow up', 'followup', 'assign', 'responsible for',
-        'let\'s', 'we should', 'i\'ll', 'i will'
-      ];
-      
-      sentences.forEach(sentence => {
-        // Clean up the sentence
-        let cleaned = sentence
-          .replace(/^(um|uh|like|so|well|okay|alright)\s+/gi, '')
-          .replace(/\s+(um|uh|like)\s+/gi, ' ')
-          .trim();
-        
-        // Capitalize first letter
-        if (cleaned.length > 0) {
-          cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
-        }
-        
-        // Ensure proper ending punctuation
-        if (!/[.!?]$/.test(cleaned)) {
-          cleaned += '.';
-        }
-        
-        const lowerSentence = cleaned.toLowerCase();
-        const isAction = actionKeywords.some(keyword => lowerSentence.includes(keyword));
-        
-        if (isAction) {
-          // Format action items more clearly
-          let actionText = cleaned;
-          
-          // Extract who is responsible if mentioned
-          const nameMatch = cleaned.match(/\b([A-Z][a-z]+)\s+(will|should|needs to|has to)/);
-          if (nameMatch) {
-            actionText = `${nameMatch[1]}: ${cleaned}`;
-          }
-          
-          actionItems.push(actionText);
-        } else {
-          // Check if it's a key point (contains important keywords)
-          const keyPointWords = ['important', 'key', 'main', 'critical', 'essential', 'decided', 'agreed', 'discussed'];
-          const isKeyPoint = keyPointWords.some(word => lowerSentence.includes(word));
-          
-          if (isKeyPoint || cleaned.length > 20) {
-            bullets.push(cleaned);
-          }
-        }
+      particles.forEach(p => {
+        p.z -= p.speed;
+        if(p.z <= 0){ p.z = 1000; p.x = Math.random()*canvas.width; p.y = Math.random()*canvas.height; }
+        const scale = 1000/(1000+p.z);
+        const x = (p.x - canvas.width/2)*scale + canvas.width/2;
+        const y = (p.y - canvas.height/2)*scale + canvas.height/2;
+        ctx.fillStyle = `rgba(0,217,255,${1-p.z/1000})`;
+        ctx.beginPath(); ctx.arc(x,y,p.size*scale,0,Math.PI*2); ctx.fill();
       });
-      
-      // Remove duplicates and very similar items
-      const uniqueBullets = [...new Set(bullets)];
-      const uniqueActions = [...new Set(actionItems)];
-      
-      return { 
-        bullets: uniqueBullets.slice(0, 15), // Limit to top 15 points
-        actionItems: uniqueActions.slice(0, 10) // Limit to top 10 actions
+
+      if(gameState.inCombat && gameState.currentMonster){
+        const cx = canvas.width/2, cy = canvas.height/2;
+        const size = 90 + Math.sin(time*3)*15;
+        ctx.fillStyle = '#e94560';
+        ctx.shadowBlur = 30; ctx.shadowColor = '#e94560';
+        ctx.beginPath(); ctx.arc(cx,cy,size,0,Math.PI*2); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 48px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Monster', cx, cy+16);
+      }
+
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // ==================================================================
+    // UI HELPERS
+    // ==================================================================
+    function addLog(msg, type=''){ 
+      const log = document.getElementById('combat-log');
+      const e = document.createElement('div');
+      e.className = `log-entry ${type}`;
+      e.textContent = msg;
+      log.appendChild(e);
+      log.scrollTop = log.scrollHeight;
+      if(log.children.length > 12) log.removeChild(log.firstChild);
+    }
+
+    function showToast(msg){
+      const t = document.createElement('div');
+      t.className='toast'; t.textContent=msg; document.body.appendChild(t);
+      setTimeout(()=>t.remove(),2000);
+    }
+
+    function updateUI(){
+      if(!gameState.playerData) return;
+      const p = gameState.playerData;
+      document.getElementById('player-level').textContent = p.player_level;
+      document.getElementById('player-gold').textContent = p.player_gold;
+      document.getElementById('health-fill').style.width = (p.player_health / p.player_max_health * 100) + '%';
+
+      const expNeeded = p.player_level * 100;
+      document.getElementById('exp-fill').style.width = (p.player_experience / expNeeded * 100) + '%';
+
+      // Weapon & Armor
+      const w = getWeaponForLevel(p.player_level);
+      document.querySelector('#weapon-slot .equipment-name').textContent = w.name;
+      document.querySelector('#weapon-slot .equipment-stats').textContent = `Damage: ${w.damage}`;
+
+      const a = getArmorForLevel(p.player_level);
+      document.querySelector('#armor-slot .equipment-name').textContent = a.name;
+      document.querySelector('#armor-slot .equipment-stats').textContent = `Defense: ${a.defense}`;
+
+      // Inventory (just for show)
+      const inv = p.inventory_items ? JSON.parse(p.inventory_items) : [];
+      const grid = document.getElementById('inventory-grid');
+      grid.innerHTML = '';
+      inv.forEach(item=>{ const d=document.createElement('div'); d.className='inventory-item'; d.textContent=item; grid.appendChild(d); });
+    }
+
+    function checkLevelUp(){
+      const p = gameState.playerData;
+      const needed = p.player_level * 100;
+      while(p.player_experience >= needed){
+        p.player_level++;
+        p.player_experience -= needed;
+        p.player_max_health += 30;
+        p.player_health = p.player_max_health;
+        showToast(`LEVEL UP! Level ${p.player_level}!`);
+        addLog(`You reached level ${p.player_level}!`, 'log-level');
+        savePlayerData();
+      }
+      updateUI();
+    }
+
+    async function savePlayerData(){
+      if(!gameState.playerData) return;
+      const r = await window.dataSdk.update(gameState.playerData);
+      if(!r.isOk) addLog('Failed to save', '');
+      updateUI();
+    }
+
+    // ==================================================================
+    // COMBAT
+    // ==================================================================
+    function spawnMonster(){
+      const monster = generateMonster(gameState.playerData.player_level);
+      gameState.currentMonster = monster;
+      gameState.inCombat = true;
+
+      document.getElementById('monster-info').style.display = 'block';
+      document.getElementById('monster-name').textContent = monster.name;
+      document.getElementById('monster-level').textContent = `Level ${monster.level}`;
+      document.getElementById('monster-health-fill').style.width = '100%';
+
+      addLog(`A wild ${monster.name} (Lvl ${monster.level}) appears!`, '');
+    }
+
+    function updateMonsterHealth(){
+      const m = gameState.currentMonster;
+      const pct = m.currentHealth / m.health * 100;
+      document.getElementById('monster-health-fill').style.width = pct + '%';
+    }
+
+    function playerAttack(){
+      const p = gameState.playerData;
+      const w = getWeaponForLevel(p.player_level);
+      const [min,max] = w.damage.split('-').map(Number);
+      const dmg = Math.floor(Math.random()*(max-min+1))+min;
+
+      gameState.currentMonster.currentHealth -= dmg;
+      addLog(`You deal ${dmg} damage!`, 'log-damage');
+      updateMonsterHealth();
+
+      if(gameState.currentMonster.currentHealth <= 0){
+        const m = gameState.currentMonster;
+        p.player_experience += m.exp;
+        p.player_gold += m.gold;
+        addLog(`${m.name} defeated! +${m.exp} EXP +${m.gold} Gold`, 'log-loot');
+        endCombat();
+        checkLevelUp();
+        savePlayerData();
+        return;
+      }
+      setTimeout(monsterAttack, 800);
+    }
+
+    function monsterAttack(){
+      if(!gameState.inCombat) return;
+      const m = gameState.currentMonster;
+      const a = getArmorForLevel(gameState.playerData.player_level);
+      const dmg = Math.max(1, m.damage - a.defense);
+
+      gameState.playerData.player_health -= dmg;
+      addLog(`${m.name} hits you for ${dmg} damage!`, 'log-damage');
+      updateUI();
+
+      if(gameState.playerData.player_health <= 0) playerDefeated();
+    }
+
+    function playerDefeated(){
+      gameState.playerData.player_health = 1;
+      gameState.playerData.player_gold = Math.floor(gameState.playerData.player_gold * 0.5);
+      addLog('YOU DIED! Lost half your gold.', 'log-damage');
+      showToast('You were defeated!');
+      endCombat();
+      savePlayerData();
+    }
+
+    function endCombat(){
+      gameState.inCombat = false;
+      gameState.currentMonster = null;
+      document.getElementById('monster-info').style.display = 'none';
+    }
+
+    // ==================================================================
+    // BUTTONS
+    // ==================================================================
+    document.getElementById('attack-btn').onclick = () => { if(gameState.inCombat) playerAttack(); };
+    document.getElementById('flee-btn').onclick   onclick = () => { addLog('You fled!'); endCombat(); };
+    document.getElementById('explore-btn').onclick = () => { if(!gameState.inCombat) spawnMonster(); };
+    document.getElementById('heal-btn').onclick = async () => {
+      if(gameState.playerData.player_gold >= 50){
+        gameState.playerData.player_gold -= 50;
+        gameState.playerData.player_health = gameState.playerData.player_max_health;
+        addLog('Fully healed!', 'log-heal');
+        await savePlayerData();
+      } else addLog('Not enough gold!', '');
+    };
+
+    // ==================================================================
+    // START GAME
+    // ==================================================================
+    document.getElementById('start-game-btn').onclick = async () => {
+      const name = document.getElementById('player-name-input').value.trim();
+      if(!name) return document.getElementById('player-name-input').style.borderColor = '#e94560';
+
+      const newPlayer = {
+        player_name: name,
+        player_level: 1,
+        player_health: 100,
+        player_max_health: 100,
+        player_experience: 0,
+        player_gold: 200,
+        inventory_items: JSON.stringify(["Health Potion","Mana Crystal","Ancient Scroll"])
       };
-    }
 
-    // Render notes list
-    function renderNotes() {
-      const notesList = document.getElementById('notes-list');
-      const emptyState = document.getElementById('empty-state');
-      
-      if (allNotes.length === 0) {
-        emptyState.style.display = 'block';
-        notesList.innerHTML = '';
-        notesList.appendChild(emptyState);
-        return;
+      const res = await window.dataSdk.create(newPlayer);
+      if(res.isOk){
+        addLog(`Welcome, ${name}! The endless journey begins…`, 'log-level');
       }
-      
-      emptyState.style.display = 'none';
-      notesList.innerHTML = '';
-      
-      const sortedNotes = [...allNotes].sort((a, b) => 
-        new Date(b.createdAt) - new Date(a.createdAt)
-      );
-      
-      sortedNotes.forEach(note => {
-        const noteCard = document.createElement('div');
-        noteCard.className = 'note-card';
-        
-        const bullets = note.bullets ? note.bullets.split('|||').filter(b => b.trim()) : [];
-        const actions = note.actionItems ? note.actionItems.split('|||').filter(a => a.trim()) : [];
-        
-        const date = new Date(note.createdAt);
-        const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
-        noteCard.innerHTML = `
-          <div class="note-header">
-            <h3 class="note-title">${escapeHtml(note.title)}</h3>
-            <button class="delete-btn" data-id="${note.__backendId}">Delete</button>
-          </div>
-          <div class="note-date">${dateStr}</div>
-          
-          ${bullets.length > 0 ? `
-            <div class="note-section">
-              <div class="section-label">Key Points</div>
-              <ul class="bullet-list">
-                ${bullets.map(b => `<li>${escapeHtml(b)}</li>`).join('')}
-              </ul>
-            </div>
-          ` : ''}
-          
-          ${actions.length > 0 ? `
-            <div class="note-section">
-              <div class="section-label">Action Items</div>
-              ${actions.map(a => `<div class="action-item">⚡ ${escapeHtml(a)}</div>`).join('')}
-            </div>
-          ` : ''}
-        `;
-        
-        notesList.appendChild(noteCard);
-      });
-      
-      // Add delete handlers
-      document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', handleDelete);
-      });
-    }
+    };
 
-    // Handle delete
-    async function handleDelete(e) {
-      const backendId = e.target.dataset.id;
-      const note = allNotes.find(n => n.__backendId === backendId);
-      
-      if (!note) return;
-      
-      e.target.disabled = true;
-      e.target.textContent = 'Deleting...';
-      
-      const result = await window.dataSdk.delete(note);
-      
-      if (!result.isOk) {
-        e.target.disabled = false;
-        e.target.textContent = 'Delete';
-        showToast('Failed to delete note. Please try again.', 'error');
+    // ==================================================================
+    // DATA SDK HANDLER
+    // ==================================================================
+    const dataHandler = {
+      onDataChanged(data){
+        if(data.length > 0){
+          gameState.playerData = data[0];
+          gameState.gameStarted = true;
+          document.getElementById('welcome-screen').style.display = 'none';
+          updateUI();
+        }
       }
+    };
+
+    // Init Data SDK
+    (async()=>{
+      if(window.dataSdk) await window.dataSdk.init(dataHandler);
+    })();
+
+    // Optional: Element SDK for live theme editing (kept from your original code)
+    if(window.elementSdk){
+      window.elementSdk.init({ defaultConfig, onConfigChange:()=>{}, mapToCapabilities:()=> ({recolorables:[],borderables:[]}) });
     }
-
-    // Handle generate notes
-    async function handleGenerate() {
-      const title = document.getElementById('note-title').value.trim();
-      const transcript = document.getElementById('transcript').value.trim();
-      
-      if (!transcript) {
-        showToast('Please paste or record a transcript first!', 'error');
-        return;
-      }
-
-      if (allNotes.length >= 999) {
-        showToast('Maximum limit of 999 notes reached. Please delete some notes first.', 'error');
-        return;
-      }
-      
-      const generateBtn = document.getElementById('generate-btn');
-      generateBtn.disabled = true;
-      generateBtn.textContent = 'Processing...';
-      
-      const { bullets, actionItems } = processTranscript(transcript);
-      
-      const noteData = {
-        id: Date.now().toString(),
-        title: title || 'Untitled Meeting',
-        transcript: transcript,
-        bullets: bullets.join('|||'),
-        actionItems: actionItems.join('|||'),
-        createdAt: new Date().toISOString()
-      };
-      
-      const result = await window.dataSdk.create(noteData);
-      
-      if (result.isOk) {
-        document.getElementById('note-title').value = '';
-        document.getElementById('transcript').value = '';
-        currentTranscript = '';
-        updateWordCount();
-        showToast('✓ Notes generated successfully!', 'success');
-      } else {
-        showToast('Failed to save notes. Please try again.', 'error');
-      }
-      
-      generateBtn.disabled = false;
-      generateBtn.textContent = window.elementSdk?.config?.generate_button_text || defaultConfig.generate_button_text;
-    }
-
-    function showToast(message, type) {
-      const toast = document.createElement('div');
-      const bgColor = type === 'success' ? '#48bb78' : '#fc8181';
-      toast.style.cssText = `position: fixed; top: 20px; right: 20px; background: ${bgColor}; color: white; padding: 16px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000;`;
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-    }
-
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    // Event listeners
-    document.getElementById('record-btn').addEventListener('click', toggleRecording);
-    document.getElementById('clear-btn').addEventListener('click', clearTranscript);
-    document.getElementById('generate-btn').addEventListener('click', handleGenerate);
-
-    // Initialize on load
-    init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a1939b8d54e6cda',t:'MTc2MzY1NTExMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ </body>
 </html>
