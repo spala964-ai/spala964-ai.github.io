@@ -1,475 +1,371 @@
 <!doctype html>
 <html lang="en">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D MMO RPG – Infinite Progression</title>
-  <script src="/_sdk/data_sdk.js"></script>
-  <script src="/_sdk/element_sdk.js"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Palladium Addon Generator</title>
+
+  <!-- JSZip for .zip creation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
   <style>
     body {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      color: #e0e0e0;
-      overflow: hidden;
-      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      width: 100%;
+      min-height: 100%;
     }
-    html { height: 100%; }
-    #game-container { display: flex; height: 100%; position: relative; }
-    #game-world { flex: 1; position: relative; background: linear-gradient(180deg, #0f3460 0%, #1a1a2e 100%); overflow: hidden; }
-    canvas { display: block; width: 100%; height: 100%; }
-    #ui-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
-    #ui-overlay > * { pointer-events: auto; }
 
-    /* === All your original beautiful styles remain unchanged === */
-    #top-bar { background: rgba(26,26,46,0.9); padding:15px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #e94560; }
-    #game-title { font-size:24px; font-weight:bold; color:#e94560; text-shadow:0 0 10px rgba(233,69,96,0.5); }
-    #player-stats { display:flex; gap:20px; align-items:center; }
-    .stat-item { display:flex; flex-direction:column; gap:4px; }
-    .stat-label { font-size:11px; color:#a0a0a0; text-transform:uppercase; }
-    .stat-value { font-size:16px; font-weight:bold; color:#00d9ff; }
-    .health-bar { width:150px; height:20px; background:rgba(0,0,0,0.5); border-radius:10px; overflow:hidden; border:1px solid #e94560; }
-    .health-fill { height:100%; background:linear-gradient(90deg,#e94560 0%,#ff6b6b 100%); transition:width .3s; }
-    .exp-bar { width:150px; height:8px; background:rgba(0,0,0,0.5); border-radius:4px; overflow:hidden; border:1px solid #00d9ff; }
-    .exp-fill { height:100%; background:linear-gradient(90deg,#00d9ff 0%,#00ff88 100%); transition:width .3s; }
+    html, body { height: 100%; }
 
-    #side-panel { width:320px; background:rgba(22,33,62,0.95); border-left:2px solid #e94560; display:flex; flex-direction:column; overflow-y:auto; }
-    .panel-section { padding:20px; border-bottom:1px solid rgba(233,69,96,0.3); }
-    .panel-title { font-size:18px; font-weight:bold; color:#e94560; margin-bottom:15px; text-transform:uppercase; }
+    .app-container {
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100%;
+    }
 
-    .equipment-slot { background:rgba(15,52,96,0.6); padding:12px; border-radius:8px; margin-bottom:10px; border:2px solid #0f3460; transition:.3s; }
-    .equipment-slot:hover { border-color:#00d9ff; transform:translateX(5px); }
-    .equipment-name { font-weight:bold; color:#00d9ff; margin-bottom:4px; }
-    .equipment-stats { font-size:12px; color:#a0a0a0; }
+    .generator-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 32px;
+      width: 100%;
+      max-width: 900px;
+    }
 
-    .inventory-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-    .inventory-item { background:rgba(15,52,96,0.6); padding:10px; border-radius:6px; text-align:center; border:2px solid #0f3460; cursor:pointer; transition:.3s; }
-    .inventory-item:hover { border-color:#00d9ff; transform:scale(1.05); }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+      color: #1a202c;
+    }
 
-    .action-button { background:linear-gradient(135deg,#e94560 0%,#d63447 100%); color:white; border:none; padding:12px 24px; border-radius:6px; font-size:14px; font-weight:bold; cursor:pointer; transition:.3s; text-transform:uppercase; margin-top:10px; width:100%; }
-    .action-button:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(233,69,96,0.4); }
+    .header p {
+      font-size: 14px;
+      color: #718096;
+      margin: 0;
+    }
 
-    #combat-log { position:absolute; bottom:20px; left:20px; right:340px; background:rgba(26,26,46,0.9); padding:15px; border-radius:8px; border:2px solid #e94560; max-height:150px; overflow-y:auto; }
-    .log-entry { padding:5px 0; font-size:13px; border-bottom:1px solid rgba(233,69,96,0.2); }
-    .log-entry:last-child { border:none; }
-    .log-damage { color:#ff6b6b; }
-    .log-heal { color:#00ff88; }
-    .log-loot { color:#ffd700; }
-    .log-level { color:#00d9ff; font-weight:bold; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
 
-    #monster-info { position:absolute; top:100px; left:50%; transform:translateX(-50%); background:rgba(26,26,46,0.95); padding:20px 30px; border-radius:10px; border:2px solid #e94560; text-align:center; min-width:250px; display:none; }
-    .monster-name { font-size:20px; font-weight:bold; color:#e94560; margin-bottom:10px; }
-    .monster-level { font-size:14px; color:#00d9ff; margin-bottom:15px; }
-    .monster-health-bar { width:100%; height:25px; background:rgba(0,0,0,0.5); border-radius:12px; overflow:hidden; border:2px solid #e94560; margin-bottom:15px; }
-    .monster-health-fill { height:100%; background:linear-gradient(90deg,#ff6b6b 0%,#e94560 100%); transition:width .3s; }
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
 
-    .combat-buttons { display:flex; gap:10px; }
-    .combat-button { flex:1; background:linear-gradient(135deg,#00d9ff 0%,#0099cc 100%); color:white; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer; transition:.3s; }
-    .combat-button:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(0,217,255,0.4); }
+    .form-input, .form-select, .form-textarea {
+      padding: 10px 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      width: 100%;
+      transition: all 0.2s;
+    }
 
-    #welcome-screen { position:absolute; inset:0; background:rgba(26,26,46,0.98); display:flex; align-items:center; justify-content:center; z-index:1000; }
-    .welcome-content { background:rgba(22,33,62,0.95); padding:40px; border-radius:15px; border:3px solid #e94560; text-align:center; max-width:400px; }
-    .welcome-title { font-size:32px; font-weight:bold; color:#e94560; margin-bottom:20px; text-shadow:0 0 20px rgba(233,69,96,0.5); }
-    .welcome-message { font-size:16px; color:#a0a0a0; margin-bottom:30px; line-height:1.6; }
-    .name-input { width:100%; padding:15px; background:rgba(15,52,96,0.6); border:2px solid #0f3460; border-radius:8px; color:#e0e0e0; font-size:16px; margin-bottom:20px; box-sizing:border-box; }
-    .name-input:focus { outline:none; border-color:#00d9ff; }
-    .start-button { background:linear-gradient(135deg,#e94560 0%,#d63447 100%); color:white; border:none; padding:15px 40px; border-radius:8px; font-size:18px; font-weight:bold; cursor:pointer; transition:.3s; text-transform:uppercase; }
-    .start-button:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(233,69,96,0.5); }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102,126,234,.2);
+    }
 
-    .toast { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,217,255,0.95); color:#1a1a2e; padding:20px 40px; border-radius:10px; font-size:18px; font-weight:bold; z-index:2000; animation:fadeInOut 2s; }
-    @keyframes fadeInOut { 0%,100%{opacity:0} 10%,90%{opacity:1} }
+    .add-power-btn {
+      background: #48bb78;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .power-card {
+      background: #f7fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .power-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .remove-power-btn {
+      background: #f56565;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .power-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .power-field-full { grid-column: 1 / -1; }
+
+    .generate-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 14px 32px;
+      font-size: 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      border: none;
+      margin-top: 20px;
+    }
+
+    .status-message {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      display: none;
+    }
+
+    .status-error {
+      background: #fed7d7;
+      color: #742a2a;
+      border: 2px solid #fc8181;
+    }
+
+    .status-success {
+      background: #c6f6d5;
+      color: #22543d;
+      border: 2px solid #9ae6b4;
+    }
+
+    .status-info {
+      background: #bee3f8;
+      color: #2c5282;
+      border: 2px solid #90cdf4;
+    }
   </style>
-  <style>@view-transition { navigation: auto; }</style>
-  <script src="https://cdn.tailwindcss.com"></script>
- </head>
- <body>
-  <div id="game-container">
-   <div id="game-world">
-    <canvas id="game-canvas"></canvas>
-    <div id="ui-overlay">
-     <div id="top-bar">
-      <div id="game-title">Infinite MMO RPG</div>
-      <div id="player-stats">
-       <div class="stat-item"><div class="stat-label">Level</div><div class="stat-value" id="player-level">1</div></div>
-       <div class="stat-item"><div class="stat-label">Health</div><div class="health-bar"><div class="health-fill" id="health-fill"></div></div></div>
-       <div class="stat-item"><div class="stat-label">Experience</div><div class="exp-bar"><div class="exp-fill" id="exp-fill"></div></div></div>
-       <div class="stat-item"><div class="stat-label">Gold</div><div class="stat-value" id="player-gold">0</div></div>
+</head>
+
+<body>
+<div class="app-container">
+  <div class="generator-card">
+
+    <header class="header">
+      <h1>Palladium Addon Generator</h1>
+      <p>Create a data-driven Palladium addon (JSON files) and download as a ZIP.</p>
+    </header>
+
+    <div class="form-grid">
+      <div>
+        <label class="form-label">Pack Name</label>
+        <input id="pack-name" class="form-input" value="my-palladium-addon" />
       </div>
-     </div>
 
-     <div id="monster-info">
-      <div class="monster-name" id="monster-name"></div>
-      <div class="monster-level" id="monster-level"></div>
-      <div class="monster-health-bar"><div class="monster-health-fill" id="monster-health-fill"></div></div>
-      <div class="combat-buttons">
-       <button class="combat-button" id="attack-btn">Attack</button>
-       <button class="combat-button" id="flee-btn">Flee</button>
+      <div>
+        <label class="form-label">Author</label>
+        <input id="author" class="form-input" value="YourName" />
       </div>
-     </div>
 
-     <div id="combat-log"></div>
+      <div>
+        <label class="form-label">Version</label>
+        <input id="version" class="form-input" value="1.0.0" />
+      </div>
     </div>
-   </div>
 
-   <div id="side-panel">
-    <div class="panel-section">
-     <div class="panel-title">Equipment</div>
-     <div class="equipment-slot" id="weapon-slot"><div class="equipment-name">Rusty Sword</div><div class="equipment-stats">Damage: 5-10</div></div>
-     <div class="equipment-slot" id="armor-slot"><div class="equipment-name">Cloth Armor</div><div class="equipment-stats">Defense: 2</div></div>
-    </div>
-    <div class="panel-section">
-     <div class="panel-title">Inventory</div>
-     <div class="inventory-grid" id="inventory-grid"></div>
-    </div>
-    <div class="panel-section">
-     <div class="panel-title">Actions</div>
-     <button class="action-button" id="explore-btn">Explore Dungeon</button>
-     <button class="action-button" id="heal-btn">Rest & Heal (50 Gold)</button>
-    </div>
-   </div>
+    <section class="powers-section">
+      <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:20px; font-weight:700;">Powers</span>
+        <button class="add-power-btn" id="add-power-btn">+ Add Power</button>
+      </div>
 
-   <div id="welcome-screen">
-    <div class="welcome-content">
-     <div class="welcome-title">Infinite MMO RPG</div>
-     <div class="welcome-message">Welcome, brave soul! Enter your name to begin an endless journey.</div>
-     <input type="text" class="name-input" id="player-name-input" placeholder="Enter your name" maxlength="20">
-     <button class="start-button" id="start-game-btn">Start Adventure</button>
-    </div>
-   </div>
+      <div id="powers-container"></div>
+    </section>
+
+    <button class="generate-btn" id="generate-btn">Generate & Download ZIP</button>
+    <div id="status-message" class="status-message"></div>
+
   </div>
+</div>
 
-  <script>
-    // ==================================================================
-    // CONFIG & DATA
-    // ==================================================================
-    const defaultConfig = {
-      game_title: "Infinite MMO RPG",
-      welcome_message: "Welcome, brave soul! Enter your name to begin an endless journey.",
-      background_color: "#1a1a2e",
-      surface_color: "#16213e",
-      text_color: "#e0e0e0",
-      primary_action_color: "#e94560",
-      secondary_action_color: "#00d9ff",
-      font_family: "Segoe UI",
-      font_size: 16
+<script>
+  let powers = [
+    {
+      id: "speedster",
+      name: "Speedster",
+      description: "Run very fast",
+      tier: "Common"
+    }
+  ];
+
+  function renderPowers() {
+    const container = document.getElementById("powers-container");
+    container.innerHTML = "";
+
+    powers.forEach((power, index) => {
+      container.innerHTML += `
+        <div class="power-card">
+          <div class="power-header">
+            <strong>Power #${index + 1}</strong>
+            <button class="remove-power-btn" onclick="removePower(${index})">Remove</button>
+          </div>
+
+          <div class="power-fields">
+            <div>
+              <label class="form-label">Power ID</label>
+              <input class="form-input" value="${power.id}" onchange="updatePower(${index}, 'id', this.value)">
+            </div>
+
+            <div>
+              <label class="form-label">Power Name</label>
+              <input class="form-input" value="${power.name}" onchange="updatePower(${index}, 'name', this.value)">
+            </div>
+
+            <div class="power-field-full">
+              <label class="form-label">Description</label>
+              <textarea class="form-textarea" onchange="updatePower(${index}, 'description', this.value)">${power.description}</textarea>
+            </div>
+
+            <div>
+              <label class="form-label">Tier</label>
+              <select class="form-select" onchange="updatePower(${index}, 'tier', this.value)">
+                <option ${power.tier === "Common" ? "selected" : ""}>Common</option>
+                <option ${power.tier === "Uncommon" ? "selected" : ""}>Uncommon</option>
+                <option ${power.tier === "Rare" ? "selected" : ""}>Rare</option>
+                <option ${power.tier === "Epic" ? "selected" : ""}>Epic</option>
+                <option ${power.tier === "Legendary" ? "selected" : ""}>Legendary</option>
+                <option ${power.tier === "Godly" ? "selected" : ""}>Godly</option>
+                <option ${power.tier === "Titan" ? "selected" : ""}>Titan</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function addPower() {
+    powers.push({
+      id: "power_" + Date.now(),
+      name: "New Power",
+      description: "",
+      tier: "Common"
+    });
+    renderPowers();
+  }
+
+  function updatePower(index, field, value) {
+    powers[index][field] = value;
+  }
+
+  function removePower(index) {
+    powers.splice(index, 1);
+    renderPowers();
+  }
+
+  function makeManifest() {
+    return {
+      pack: {
+        name: document.getElementById("pack-name").value,
+        description: `Palladium addon pack generated by ${document.getElementById("author").value}`,
+        version: document.getElementById("version").value
+      }
     };
+  }
 
-    let gameState = {
-      playerData: null,
-      currentMonster: null,
-      inCombat: false,
-      gameStarted: false
+  function makePowerJSON(power) {
+    return {
+      type: "palladium:power",
+      id: power.id,
+      display: {
+        name: power.name,
+        description: power.description || "No description provided."
+      },
+      metadata: {
+        author: document.getElementById("author").value,
+        version: document.getElementById("version").value,
+        tier: power.tier
+      },
+      abilities: [
+        {
+          id: `${power.id}_ability_1`,
+          name: `${power.name} Ability`,
+          cooldown: 0,
+          energyCost: 0,
+          effect: { type: "generic_effect", params: {} }
+        }
+      ]
     };
+  }
 
-    // ==================================================================
-    // INFINITE MONSTER GENERATOR (up to level 1000+)
-    // ==================================================================
-    const MONSTER_BASES = [
-      "Goblin", "Wolf", "Skeleton", "Orc", "Troll", "Demon", "Dragon", "Ancient Beast","Void Lord","Cosmic Horror"
-    ];
-    const MONSTER_TITLES = [
-      "Scout","Warrior","Champion","Lord","King","Emperor","Overlord","God","Titan","Primordial"
-    ];
+  function showStatus(text, type) {
+    const div = document.getElementById("status-message");
+    div.className = "status-message status-" + type;
+    div.textContent = text;
+    div.style.display = "block";
+  }
 
-    function generateMonster(playerLevel) {
-      // Base level is around player level ± some randomness
-      const baseLevel = playerLevel + Math.floor(Math.random() * 11) - 3; // can be a bit lower or much higher
-      const level = Math.max(1, baseLevel + Math.floor(playerLevel / 10)); // gets harder faster at high levels
-
-      const baseIndex = Math.min(Math.floor((level-1) / 100), MONSTER_BASES.length - 1);
-      const titleIndex = Math.min(Math.floor((level-1) / 50), MONSTER_TITLES.length - 1);
-
-      const name = `${MONSTER_TITLES[titleIndex]} ${MONSTER_BASES[baseIndex]}`;
-
-      // Scaling formulas (feel free to tweak)
-      const health = Math.floor(30 * Math.pow(level, 1.5));
-      const damage = Math.floor(3 + level * 2.8);
-      const exp    = Math.floor(15 * Math.pow(level, 1.6));
-      const gold   = Math.floor(10 + level * 15);
-
-      return {
-        name,
-        level,
-        health,
-        damage,
-        exp,
-        gold,
-        currentHealth: health
-      };
+  async function generateZip() {
+    if (powers.length === 0) {
+      showStatus("Add at least one power!", "error");
+      return;
     }
 
-    // ==================================================================
-    // WEAPONS & ARMORS – now also infinite
-    // ==================================================================
-    const WEAPON_TIERS = ["Rusty","Bronze","Iron","Steel","Mithril","Adamant","Rune","Dragon","Void","Celestial","Eternal","Infinite"];
-    const ARMOR_TIERS  = ["Cloth","Leather","Chain","Plate","Mithril","Adamant","Rune","Dragon","Void","Celestial","Eternal","Infinite"];
+    showStatus("Building ZIP...", "info");
 
-    function getWeaponForLevel(lvl) {
-      const tier = Math.min(Math.floor((lvl-1)/10), WEAPON_TIERS.length-1);
-      const minDmg = 5 + tier*25 + Math.floor(lvl*3);
-      const maxDmg = minDmg + 10 + tier*15 + Math.floor(lvl*2);
-      return {
-        name: `${WEAPON_TIERS[tier]} Blade`,
-        damage: `${minDmg}-${maxDmg}`
-      };
-    }
+    try {
+      const zip = new JSZip();
+      zip.file("manifest.json", JSON.stringify(makeManifest(), null, 2));
 
-    function getArmorForLevel(lvl) {
-      const tier = Math.min(Math.floor((lvl-1)/10), ARMOR_TIERS.length-1);
-      const defense = 2 + tier*12 + Math.floor(lvl*2.5);
-      return {
-        name: `${ARMOR_TIERS[tier]} Armor`,
-        defense
-      };
-    }
-
-    // ==================================================================
-    // CANVAS STARFIELD BACKGROUND + MONSTER IN COMBAT
-    // ==================================================================
-    const canvas = document.getElementById('game-canvas');
-    const ctx = canvas.getContext('2d');
-    function resizeCanvas(){ canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; }
-    resizeCanvas(); window.addEventListener('resize', resizeCanvas);
-
-    let particles = [], time = 0;
-    for(let i=0;i<150;i++) particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,z:Math.random()*1000,size:Math.random()*2+1,speed:Math.random()*0.5+0.2});
-
-    function animate() {
-      ctx.fillStyle = 'rgba(15,52,96,0.1)';
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-      time += 0.01;
-
-      particles.forEach(p => {
-        p.z -= p.speed;
-        if(p.z <= 0){ p.z = 1000; p.x = Math.random()*canvas.width; p.y = Math.random()*canvas.height; }
-        const scale = 1000/(1000+p.z);
-        const x = (p.x - canvas.width/2)*scale + canvas.width/2;
-        const y = (p.y - canvas.height/2)*scale + canvas.height/2;
-        ctx.fillStyle = `rgba(0,217,255,${1-p.z/1000})`;
-        ctx.beginPath(); ctx.arc(x,y,p.size*scale,0,Math.PI*2); ctx.fill();
+      const pFolder = zip.folder("powers");
+      powers.forEach(power => {
+        pFolder.file(power.id + ".json", JSON.stringify(makePowerJSON(power), null, 2));
       });
 
-      if(gameState.inCombat && gameState.currentMonster){
-        const cx = canvas.width/2, cy = canvas.height/2;
-        const size = 90 + Math.sin(time*3)*15;
-        ctx.fillStyle = '#e94560';
-        ctx.shadowBlur = 30; ctx.shadowColor = '#e94560';
-        ctx.beginPath(); ctx.arc(cx,cy,size,0,Math.PI*2); ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 48px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('Monster', cx, cy+16);
-      }
+      zip.file("README.txt", "Generated by Palladium Addon Generator.");
 
-      requestAnimationFrame(animate);
+      const blob = await zip.generateAsync({ type: "blob" });
+
+      // Safe download
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = (document.getElementById("pack-name").value || "palladium-addon") + ".zip";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showStatus("ZIP ready! Check your downloads.", "success");
+
+    } catch (err) {
+      console.error(err);
+      showStatus("Error generating ZIP.", "error");
     }
-    animate();
+  }
 
-    // ==================================================================
-    // UI HELPERS
-    // ==================================================================
-    function addLog(msg, type=''){ 
-      const log = document.getElementById('combat-log');
-      const e = document.createElement('div');
-      e.className = `log-entry ${type}`;
-      e.textContent = msg;
-      log.appendChild(e);
-      log.scrollTop = log.scrollHeight;
-      if(log.children.length > 12) log.removeChild(log.firstChild);
-    }
+  document.getElementById("add-power-btn").onclick = addPower;
+  document.getElementById("generate-btn").onclick = generateZip;
 
-    function showToast(msg){
-      const t = document.createElement('div');
-      t.className='toast'; t.textContent=msg; document.body.appendChild(t);
-      setTimeout(()=>t.remove(),2000);
-    }
+  renderPowers();
+</script>
 
-    function updateUI(){
-      if(!gameState.playerData) return;
-      const p = gameState.playerData;
-      document.getElementById('player-level').textContent = p.player_level;
-      document.getElementById('player-gold').textContent = p.player_gold;
-      document.getElementById('health-fill').style.width = (p.player_health / p.player_max_health * 100) + '%';
-
-      const expNeeded = p.player_level * 100;
-      document.getElementById('exp-fill').style.width = (p.player_experience / expNeeded * 100) + '%';
-
-      // Weapon & Armor
-      const w = getWeaponForLevel(p.player_level);
-      document.querySelector('#weapon-slot .equipment-name').textContent = w.name;
-      document.querySelector('#weapon-slot .equipment-stats').textContent = `Damage: ${w.damage}`;
-
-      const a = getArmorForLevel(p.player_level);
-      document.querySelector('#armor-slot .equipment-name').textContent = a.name;
-      document.querySelector('#armor-slot .equipment-stats').textContent = `Defense: ${a.defense}`;
-
-      // Inventory (just for show)
-      const inv = p.inventory_items ? JSON.parse(p.inventory_items) : [];
-      const grid = document.getElementById('inventory-grid');
-      grid.innerHTML = '';
-      inv.forEach(item=>{ const d=document.createElement('div'); d.className='inventory-item'; d.textContent=item; grid.appendChild(d); });
-    }
-
-    function checkLevelUp(){
-      const p = gameState.playerData;
-      const needed = p.player_level * 100;
-      while(p.player_experience >= needed){
-        p.player_level++;
-        p.player_experience -= needed;
-        p.player_max_health += 30;
-        p.player_health = p.player_max_health;
-        showToast(`LEVEL UP! Level ${p.player_level}!`);
-        addLog(`You reached level ${p.player_level}!`, 'log-level');
-        savePlayerData();
-      }
-      updateUI();
-    }
-
-    async function savePlayerData(){
-      if(!gameState.playerData) return;
-      const r = await window.dataSdk.update(gameState.playerData);
-      if(!r.isOk) addLog('Failed to save', '');
-      updateUI();
-    }
-
-    // ==================================================================
-    // COMBAT
-    // ==================================================================
-    function spawnMonster(){
-      const monster = generateMonster(gameState.playerData.player_level);
-      gameState.currentMonster = monster;
-      gameState.inCombat = true;
-
-      document.getElementById('monster-info').style.display = 'block';
-      document.getElementById('monster-name').textContent = monster.name;
-      document.getElementById('monster-level').textContent = `Level ${monster.level}`;
-      document.getElementById('monster-health-fill').style.width = '100%';
-
-      addLog(`A wild ${monster.name} (Lvl ${monster.level}) appears!`, '');
-    }
-
-    function updateMonsterHealth(){
-      const m = gameState.currentMonster;
-      const pct = m.currentHealth / m.health * 100;
-      document.getElementById('monster-health-fill').style.width = pct + '%';
-    }
-
-    function playerAttack(){
-      const p = gameState.playerData;
-      const w = getWeaponForLevel(p.player_level);
-      const [min,max] = w.damage.split('-').map(Number);
-      const dmg = Math.floor(Math.random()*(max-min+1))+min;
-
-      gameState.currentMonster.currentHealth -= dmg;
-      addLog(`You deal ${dmg} damage!`, 'log-damage');
-      updateMonsterHealth();
-
-      if(gameState.currentMonster.currentHealth <= 0){
-        const m = gameState.currentMonster;
-        p.player_experience += m.exp;
-        p.player_gold += m.gold;
-        addLog(`${m.name} defeated! +${m.exp} EXP +${m.gold} Gold`, 'log-loot');
-        endCombat();
-        checkLevelUp();
-        savePlayerData();
-        return;
-      }
-      setTimeout(monsterAttack, 800);
-    }
-
-    function monsterAttack(){
-      if(!gameState.inCombat) return;
-      const m = gameState.currentMonster;
-      const a = getArmorForLevel(gameState.playerData.player_level);
-      const dmg = Math.max(1, m.damage - a.defense);
-
-      gameState.playerData.player_health -= dmg;
-      addLog(`${m.name} hits you for ${dmg} damage!`, 'log-damage');
-      updateUI();
-
-      if(gameState.playerData.player_health <= 0) playerDefeated();
-    }
-
-    function playerDefeated(){
-      gameState.playerData.player_health = 1;
-      gameState.playerData.player_gold = Math.floor(gameState.playerData.player_gold * 0.5);
-      addLog('YOU DIED! Lost half your gold.', 'log-damage');
-      showToast('You were defeated!');
-      endCombat();
-      savePlayerData();
-    }
-
-    function endCombat(){
-      gameState.inCombat = false;
-      gameState.currentMonster = null;
-      document.getElementById('monster-info').style.display = 'none';
-    }
-
-    // ==================================================================
-    // BUTTONS
-    // ==================================================================
-    document.getElementById('attack-btn').onclick = () => { if(gameState.inCombat) playerAttack(); };
-    document.getElementById('flee-btn').onclick   onclick = () => { addLog('You fled!'); endCombat(); };
-    document.getElementById('explore-btn').onclick = () => { if(!gameState.inCombat) spawnMonster(); };
-    document.getElementById('heal-btn').onclick = async () => {
-      if(gameState.playerData.player_gold >= 50){
-        gameState.playerData.player_gold -= 50;
-        gameState.playerData.player_health = gameState.playerData.player_max_health;
-        addLog('Fully healed!', 'log-heal');
-        await savePlayerData();
-      } else addLog('Not enough gold!', '');
-    };
-
-    // ==================================================================
-    // START GAME
-    // ==================================================================
-    document.getElementById('start-game-btn').onclick = async () => {
-      const name = document.getElementById('player-name-input').value.trim();
-      if(!name) return document.getElementById('player-name-input').style.borderColor = '#e94560';
-
-      const newPlayer = {
-        player_name: name,
-        player_level: 1,
-        player_health: 100,
-        player_max_health: 100,
-        player_experience: 0,
-        player_gold: 200,
-        inventory_items: JSON.stringify(["Health Potion","Mana Crystal","Ancient Scroll"])
-      };
-
-      const res = await window.dataSdk.create(newPlayer);
-      if(res.isOk){
-        addLog(`Welcome, ${name}! The endless journey begins…`, 'log-level');
-      }
-    };
-
-    // ==================================================================
-    // DATA SDK HANDLER
-    // ==================================================================
-    const dataHandler = {
-      onDataChanged(data){
-        if(data.length > 0){
-          gameState.playerData = data[0];
-          gameState.gameStarted = true;
-          document.getElementById('welcome-screen').style.display = 'none';
-          updateUI();
-        }
-      }
-    };
-
-    // Init Data SDK
-    (async()=>{
-      if(window.dataSdk) await window.dataSdk.init(dataHandler);
-    })();
-
-    // Optional: Element SDK for live theme editing (kept from your original code)
-    if(window.elementSdk){
-      window.elementSdk.init({ defaultConfig, onConfigChange:()=>{}, mapToCapabilities:()=> ({recolorables:[],borderables:[]}) });
-    }
-  </script>
- </body>
+</body>
 </html>
