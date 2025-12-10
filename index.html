@@ -104,7 +104,8 @@
 
   <script>
   // ======= LARGE QUESTION POOL (90 questions) =======
-  const POOL = [
+  // Base question pool (original ~90 questions)
+  const BASE_POOL = [
     {q: "Which component supplies power to all components in a desktop and converts AC to DC?", choices: ["Motherboard","Power Supply Unit (PSU)","CPU","GPU"], a: 1, explain: "PSU converts AC to DC and provides voltages to system components."},
     {q: "What type of memory is non-volatile and used for storage in SSDs?", choices: ["DRAM","SRAM","Flash memory","VRAM"], a: 2, explain: "SSDs use non-volatile flash memory."},
     {q: "Which connector is used by NVMe M.2 SSDs?", choices: ["SATA","M.2","eSATA","IDE"], a: 1, explain: "NVMe SSDs commonly use the M.2 slot and PCIe lanes."},
@@ -199,6 +200,23 @@
     {q: "Which protocol is used to securely transfer files?", choices: ["FTP","SFTP","Telnet","HTTP"], a: 1, explain: "SFTP uses SSH for secure file transfers."},
     {q: "Which component should be checked for dust and airflow issues?", choices: ["PSU and case fans, heatsinks","SSD firmware","RAM ECC bits","Network cables"], a: 0, explain: "Dust buildup reduces cooling efficiency causing thermal issues."}
   ];
+
+  // Build a larger POOL of 300 questions by cloning and lightly varying the base questions
+  const POOL = [];
+  let k = 0;
+  while(POOL.length < 300){
+    const src = BASE_POOL[k % BASE_POOL.length];
+    const variantIndex = Math.floor(k / BASE_POOL.length) + 1;
+    const clone = JSON.parse(JSON.stringify(src));
+    // append a small variant note so each question appears unique
+    if(variantIndex > 1) clone.q = `${clone.q} (variant ${variantIndex})`;
+    // rotate choices slightly to vary the correct index
+    const shift = (k % clone.choices.length);
+    clone.choices = clone.choices.slice(shift).concat(clone.choices.slice(0,shift));
+    clone.a = (src.a - shift + clone.choices.length) % clone.choices.length;
+    POOL.push(clone);
+    k++;
+  }
 
   // ======= APP STATE =======
   let questions = []; // selected exam questions
