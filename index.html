@@ -309,6 +309,8 @@
   }
 
   function selectChoice(qIndex, choiceIndex){
+    // prevent changing answer once selected
+    if (userAnswers[qIndex] !== null) return;
     userAnswers[qIndex] = choiceIndex;
     progressCount.textContent = questions.filter((_,i)=>userAnswers[i]!==null).length;
     markAnswer(qIndex, choiceIndex, true);
@@ -320,6 +322,8 @@
     const buttons = container.querySelectorAll('.choice');
     buttons.forEach((b, i)=>{
       b.classList.remove('correct','wrong');
+      // disable all choices to enforce single answer
+      b.disabled = true;
       // keep clickable but indicate selection
       if(Number(b.dataset.choice) === correctIndex){
         b.classList.add('correct');
