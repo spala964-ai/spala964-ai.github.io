@@ -1,442 +1,141 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CompTIA A+ Core 1 (220-1201) (1201) — Full Practice Exam</title>
-  <style>
-    :root{--bg:#0f172a;--card:#0b1220;--accent:#06b6d4;--muted:#94a3b8;--correct:#16a34a;--wrong:#ef4444}
-    *{box-sizing:border-box}body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;line-height:1.4;margin:0;background:linear-gradient(180deg,#071024 0%,#071330 100%);color:#e6eef6;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:24px}
-    .container{width:100%;max-width:1100px}
-    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
-    h1{font-size:1.3rem;margin:0}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);padding:18px;border-radius:12px;box-shadow:0 6px 30px rgba(2,6,23,0.6)}
-    .question{font-weight:600;margin-bottom:10px}
-    .choices{display:grid;gap:8px}
-    .choice{background:rgba(255,255,255,0.02);padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;display:flex;align-items:center;gap:10px;color:inherit;text-align:left}
-    .choice:hover{transform:translateY(-2px);transition:transform .12s}
-    .choice:hover{transform:translateY(-2px);transition:transform .12s}
-    .controls{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:14px}
-    button{background:var(--accent);border:none;color:#052025;padding:10px 12px;border-radius:8px;font-weight:700;cursor:pointer}
-    button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);font-weight:600}
-    .progress{height:10px;background:rgba(255,255,255,0.03);border-radius:999px;overflow:hidden}
-    .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#7c3aed);width:0%}
-    .summary{display:none;padding-top:12px}
-    .summary.show{display:block}
-    .result{display:flex;gap:12px;align-items:center}
-    .badge{background:rgba(255,255,255,0.03);padding:8px 10px;border-radius:10px}
-    .explain{margin-top:10px;color:var(--muted);font-size:0.95rem}
-    .correct{border-color:rgba(22,163,74,0.2);background:linear-gradient(180deg,rgba(16,185,129,0.06),transparent)}
-    .wrong{border-color:rgba(239,68,68,0.14);background:linear-gradient(180deg,rgba(239,68,68,0.04),transparent)}
-    footer{margin-top:12px;display:flex;gap:8px;align-items:center;justify-content:flex-end}
-    .setup{display:flex;gap:12px;align-items:center;margin-bottom:12px}
-    label{color:var(--muted);font-weight:600}
-    input[type=number]{width:80px;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
-    .timer{font-weight:800}
-    @media (max-width:900px){.container{padding:8px}}
-  </style>
+<meta charset="UTF-8">
+<title>Universal AI Assistant</title>
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.ai-container {
+    width: 420px;
+    background: #111;
+    border-radius: 12px;
+    box-shadow: 0 0 25px rgba(0,255,255,0.4);
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    padding: 15px;
+    text-align: center;
+    background: #00ffff;
+    color: #000;
+    font-weight: bold;
+    border-radius: 12px 12px 0 0;
+}
+
+.chat {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.message {
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 6px;
+    max-width: 85%;
+}
+
+.user {
+    background: #00ffff;
+    color: #000;
+    align-self: flex-end;
+}
+
+.ai {
+    background: #333;
+}
+
+.input-area {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #333;
+}
+
+input {
+    flex: 1;
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+}
+
+button {
+    margin-left: 5px;
+    padding: 8px 12px;
+    background: #00ffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+</style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div style="width:54px;height:54px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:800;color:#001;">A+</div>
-      <div>
-        <h1>CompTIA A+ Core 1 (220-1201) (1201) — Full Practice Exam</h1>
-        <div style="color:var(--muted);font-size:0.95rem">Simulates the hardware-focused A+ Core 1 exam. Choose 75–90 questions. Timed — default 90 minutes.</div>
-      </div>
-    </header>
 
-    <section class="card setup">
-      <div>
-        <label for="qcount">Number of questions (75–90)</label><br>
-        <input id="qcount" type="number" value="90" min="75" max="90" />
-      </div>
-      <div>
-        <label for="minutes">Time (minutes)</label><br>
-        <input id="minutes" type="number" value="90" min="30" max="180" />
-      </div>
-      <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:6px">
-        <button id="startBtn">Start Exam</button>
-        <button id="practiceBtn" class="secondary">Start Practice (no timer)</button>
-      </div>
-      <div style="margin-left:auto;color:var(--muted);font-size:0.9rem">
-        <div>Tip: This exam randomizes the questions from a large pool to simulate real exam unpredictability.</div>
-      </div>
-    </section>
+<div class="ai-container">
+    <div class="header">🌐 Universal AI Assistant</div>
+    <div class="chat" id="chat"></div>
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Ask me anything...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
 
-    <main class="card" id="examCard" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div style="display:flex;gap:12px;align-items:center">
-          <div style="font-weight:700">Question <span id="qnum">1</span>/<span id="totalQ">90</span></div>
-          <div style="color:var(--muted)" id="qtype">Multiple Choice</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px">
-          <div class="timer" id="timer">90:00</div>
-          <div style="width:220px">
-            <div class="progress" aria-hidden="true"><i id="progress-bar"></i></div>
-          </div>
-        </div>
-      </div>
+<script>
+const API_KEY = "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";
 
-      <div id="quiz-area"></div>
+async function sendMessage() {
+    const input = document.getElementById("userInput");
+    const chat = document.getElementById("chat");
+    const userText = input.value.trim();
+    if (!userText) return;
 
-      <div class="controls">
-        <div style="display:flex;gap:8px;align-items:center">
-          <button id="prevBtn" class="secondary">Previous</button>
-          <button id="nextBtn">Next</button>
-          <button id="markBtn" class="secondary">Mark for Review</button>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="color:var(--muted);font-weight:600">Progress: <span id="progressCount">0</span>/<span id="totalQ2">90</span></div>
-          <button id="submitBtn" class="secondary">Submit Exam</button>
-        </div>
-      </div>
+    addMessage(userText, "user");
+    input.value = "";
 
-      <div id="summary" class="summary"></div>
+    addMessage("Thinking...", "ai");
 
-      <footer>
-        <button id="resetBtn" class="secondary">Reset</button>
-      </footer>
-    </main>
-
-    <p style="color:var(--muted);font-size:0.9rem;margin-top:10px">Save this page as an HTML file and open it in your browser. The full exam supports flagged questions, timed mode, and a printable result summary.</p>
-  </div>
-
-  <script>
-  // ======= LARGE QUESTION POOL (90 questions) =======
-  // Base question pool (original ~90 questions)
-  const BASE_POOL = [
-    {q: "Which component supplies power to all components in a desktop and converts AC to DC?", choices: ["Motherboard","Power Supply Unit (PSU)","CPU","GPU"], a: 1, explain: "PSU converts AC to DC and provides voltages to system components."},
-    {q: "What type of memory is non-volatile and used for storage in SSDs?", choices: ["DRAM","SRAM","Flash memory","VRAM"], a: 2, explain: "SSDs use non-volatile flash memory."},
-    {q: "Which connector is used by NVMe M.2 SSDs?", choices: ["SATA","M.2","eSATA","IDE"], a: 1, explain: "NVMe SSDs commonly use the M.2 slot and PCIe lanes."},
-    {q: "Which RAID level mirrors data for redundancy?", choices: ["RAID 0","RAID 1","RAID 5","RAID 10"], a: 1, explain: "RAID 1 mirrors data across drives."},
-    {q: "HTTPS typically uses which TCP port?", choices: ["80","443","25","21"], a: 1, explain: "HTTPS uses TCP port 443."},
-    {q: "Which cable supports 10 Gbps over copper and is suitable for short runs?", choices: ["Cat5e","Cat6a","Cat3","Fiber"], a: 1, explain: "Cat6a supports 10 Gbps at 100m."},
-    {q: "Which Wi‑Fi standard is 802.11ax?", choices: ["Wi‑Fi 4","Wi‑Fi 5","Wi‑Fi 6","Wi‑Fi 7"], a: 2, explain: "802.11ax is Wi‑Fi 6."},
-    {q: "If a laptop has no display but powers on, which component should be checked first?", choices: ["Battery","Display inverter/connector","Hard drive","Keyboard"], a: 1, explain: "Loose display connector or inverter issues commonly cause no display."},
-    {q: "Which display technology provides self-emitting pixels and true blacks?", choices: ["LCD","OLED","CCFL","TN"], a: 1, explain: "OLED pixels emit their own light and can turn off for true black."},
-    {q: "What is advantage of SSD over HDD?", choices: ["Higher capacity","Lower cost per GB","Faster access and no moving parts","Uses magnetic platters"], a: 2, explain: "SSDs offer faster access and fewer mechanical failures."},
-    {q: "Hypervisors are used for which purpose?", choices: ["RAID management","Running virtual machines","Printer management","Network routing"], a: 1, explain: "Hypervisors manage virtual machines."},
-    {q: "During POST, which device's failure often prevents booting?", choices: ["Monitor","RAM","USB mouse","Speakers"], a: 1, explain: "Faulty or improperly seated RAM commonly causes POST failure."},
-    {q: "Which connector carries audio and video to displays?", choices: ["VGA","DVI","HDMI","PS/2"], a: 2, explain: "HDMI carries both audio and video."},
-    {q: "ECC memory is primarily used to:", choices: ["Increase speed","Correct single-bit memory errors","Reduce size","Improve graphics"], a: 1, explain: "ECC corrects single-bit memory errors."},
-    {q: "Which interface provides highest sustained throughput for modern consumer SSDs?", choices: ["SATA III","USB 3.0","PCIe/NVMe","IDE"], a: 2, explain: "NVMe over PCIe gives highest throughput."},
-    {q: "Printer prints blank pages — first thing to check?", choices: ["Drivers","Toner/ink levels","Network","Paper tray"], a: 1, explain: "Empty toner/ink is a common cause of blank pages."},
-    {q: "127.0.0.1 refers to:", choices: ["Default gateway","Broadcast address","Loopback","Multicast"], a: 2, explain: "127.0.0.1 is the IPv4 loopback address."},
-    {q: "USB-C is used for:", choices: ["Charging and data on many modern devices","Only charging","Only audio","Legacy PS/2 devices"], a: 0, explain: "USB-C supports power, data, and alternate modes."},
-    {q: "POST stands for:", choices: ["Power-On Self-Test","Peripheral-On Self-Test","Power-Off System Test","Pre-OS System Test"], a: 0, explain: "POST: Power-On Self-Test."},
-    {q: "After identifying a problem, next troubleshooting step is:", choices: ["Implement solution","Establish theory of probable cause","Document findings","Reinstall OS"], a: 1, explain: "Establish a theory of probable cause next."},
-    {q: "Which tool is used to crimp RJ‑45 connectors?", choices: ["Phillips screwdriver","Crimping tool","Soldering iron","Wire stripper only"], a: 1, explain: "An RJ‑45 crimping tool is used to attach connectors."},
-    {q: "Which bus connects CPU and RAM on modern motherboards?", choices: ["PCIe","Front-Side Bus (historical)","Memory controller hub","Direct integrated memory controller/FSB varies"], a: 3, explain: "Modern CPUs integrate the memory controller; terminology varies but CPU directly accesses RAM."},
-    {q: "What is thermal paste used for?", choices: ["Seal ports","Improve heat transfer between CPU and heatsink","Electrical insulation","Increase CPU clock"], a: 1, explain: "Thermal paste improves heat transfer."},
-    {q: "Which display connector is analog?", choices: ["HDMI","DisplayPort","VGA","DVI-D"], a: 2, explain: "VGA is analog; others are digital."},
-    {q: "Which tool checks voltages from a PSU?", choices: ["Multimeter","Loopback plug","POST card","Tone generator"], a: 0, explain: "Multimeter measures voltages."},
-    {q: "SATA III maximum theoretical throughput is about:", choices: ["6 Gbps","3 Gbps","12 Gbps","1 Gbps"], a: 0, explain: "SATA III is up to 6 Gbps."},
-    {q: "Which component stores BIOS/UEFI settings?", choices: ["CMOS battery preserves certain settings in CMOS/RTC area","RAM","SSD","CPU cache"], a: 0, explain: "CMOS battery keeps real-time clock and BIOS settings stored when system is off."},
-    {q: "Which security practice reduces unauthorized access to physical devices?", choices: ["Strong passwords only","Cable locks and physical security","Only software firewalls","VPN"], a: 1, explain: "Physical locks and secured rooms limit physical theft."},
-    {q: "Which IPv4 class is 192.168.x.x typically considered?", choices: ["Public","Loopback","Private","Multicast"], a: 2, explain: "192.168.0.0/16 is private address space."},
-    {q: "What does DHCP provide?", choices: ["Domain name resolution","Dynamic IP addressing and lease information","Static routes","Encryption"], a: 1, explain: "DHCP assigns IP addresses and network info to hosts."},
-    {q: "Which tool helps locate breaks in copper cables?", choices: ["Toner and probe","POST card","Loopback adapter","Crimper"], a: 0, explain: "Toner and probe trace and identify wire continuity."},
-    {q: "Which wireless security standard is the weakest?", choices: ["WPA2","WPA3","WEP","WPA"], a: 2, explain: "WEP is insecure and should not be used."},
-    {q: "Which port is used by SSH?", choices: ["22","23","80","443"], a: 0, explain: "SSH uses TCP port 22."},
-    {q: "Which device forwards traffic between different networks?", choices: ["Switch","Router","Hub","Repeater"], a: 1, explain: "Routers forward packets between networks."},
-    {q: "What is MTU (Maximum Transmission Unit)?", choices: ["Max packet size transmitted without fragmentation","Minimum encryption size","Memory timing unit","CPU microcode version"], a: 0, explain: "MTU is largest packet that can be transmitted without fragmentation."},
-    {q: "Which connector is used for analog audio?", choices: ["RCA","HDMI","DisplayPort","USB-C"], a: 0, explain: "RCA connectors are commonly used for analog audio."},
-    {q: "Which tool boots a system to a known-good environment for troubleshooting?", choices: ["Live USB","Crimper","Loopback","Toner"], a: 0, explain: "A live USB can boot a separate OS for testing."},
-    {q: "What is port forwarding used for?", choices: ["Forwarding power to devices","Making internal services accessible externally","Switching VLANs","Creating RAID arrays"], a: 1, explain: "Port forwarding maps external ports to internal hosts/services."},
-    {q: "Which mobile OS uses Lightning connector?", choices: ["Android","iOS (Apple devices)","Windows Mobile","BlackBerry OS"], a: 1, explain: "Lightning is used on many Apple mobile devices (iPhones pre-USB-C)."},
-    {q: "What is a common symptom of failing RAM?", choices: ["Blue screen, random crashes, memory errors","Overheating GPU","Slow network","Blank monitor"], a: 0, explain: "Failing RAM often causes crashes and memory errors."},
-    {q: "Which tool is used to test a PSU under load?", choices: ["Power supply tester","Multimeter only","POST card","Loopback adapter"], a: 0, explain: "PSU testers and load testers check voltages under load."},
-    {q: "Which storage offers the fastest random read/write for consumer systems?", choices: ["HDD","SATA SSD","NVMe SSD","USB flash"], a: 2, explain: "NVMe SSDs offer superior random and sequential IO."},
-    {q: "Which cable carries electrical interference and is shielded?", choices: ["UTP","STP","Coax (RG6)","Fiber"], a: 1, explain: "STP includes shielding to reduce EMI."},
-    {q: "What is the purpose of thermal throttling?", choices: ["Prevent overheating by reducing CPU/GPU speed","Increase brightness","Encrypt data","Enable virtualization"], a: 0, explain: "Thermal throttling reduces performance to lower temperatures."},
-    {q: "Which technology isolates apps in mobile OS for security?", choices: ["Sandboxing","Overclocking","RAID","ECC"], a: 0, explain: "Sandboxing isolates app processes."},
-    {q: "Which device reduces signal attenuation over long Ethernet runs?", choices: ["Repeater/Extender","Router","Switch","Modem"], a: 0, explain: "Repeaters/extenders amplify signals to extend range."},
-    {q: "Which backup type only copies changed files since last full backup?", choices: ["Full","Incremental","Differential","Mirror"], a: 1, explain: "Incremental backups copy changes since last backup."},
-    {q: "Which connector is legacy serial?", choices: ["USB","RJ-45","DB-9","HDMI"], a: 2, explain: "DB-9 is a common serial connector."},
-    {q: "Which drive failure symptom indicates mechanical failure?", choices: ["Clicking noises and drive not spinning","Slow file access only","Missing icons","Blue screen unrelated to disk IO"], a: 0, explain: "Clicking and failure to spin indicates mechanical HDD failure."},
-    {q: "Which file system is commonly used by Windows?", choices: ["ext4","NTFS","HFS+","FAT32 only"], a: 1, explain: "NTFS is the common modern Windows file system."},
-    {q: "Which wireless frequency band provides greater range but lower throughput?", choices: ["5 GHz","2.4 GHz","60 GHz","900 MHz"], a: 1, explain: "2.4 GHz offers better penetration and range but less throughput."},
-    {q: "What is a MAC address?", choices: ["A network port","Unique hardware identifier for NIC","IP routing table","Encryption key"], a: 1, explain: "MAC is a physical address for network interfaces."},
-    {q: "Which video connector supports highest resolution and refresh rates commonly?", choices: ["VGA","DVI","DisplayPort","Composite"], a: 2, explain: "DisplayPort supports high bandwidth for high resolutions/refresh rates."},
-    {q: "Which practice secures a mobile device if lost?", choices: ["Disable lock screen","Enable remote wipe and strong passcode","Remove SIM permanently","Use public Wi‑Fi only"], a: 1, explain: "Remote wipe and strong passcodes protect data if lost."},
-    {q: "Which command-line tool displays current IP configuration on Windows?", choices: ["ifconfig","ipconfig","netstat","tracert"], a: 1, explain: "ipconfig shows Windows network config."},
-    {q: "Which component would you upgrade to improve multitasking performance?", choices: ["GPU","RAM","Monitor","Network card"], a: 1, explain: "More RAM helps with multitasking and running more applications."},
-    {q: "What does POST beep codes indicate?", choices: ["Bootloader version","Hardware issues detected during POST","Software patch level","Network speed"], a: 1, explain: "Beep codes indicate hardware issues during POST."},
-    {q: "Which cooling solution is best for heavy CPU loads in compact builds?", choices: ["Large air cooler","No cooler","Passive heatsink only","Small fan only"], a: 0, explain: "Large air coolers or efficient AIOs provide better cooling."},
-    {q: "Which protocol resolves hostnames to IP addresses?", choices: ["DHCP","DNS","SMTP","SNMP"], a: 1, explain: "DNS resolves domain names to IPs."},
-    {q: "Which storage uses spinning platters?", choices: ["SSD","HDD","NVMe","eMMC"], a: 1, explain: "HDDs use spinning magnetic platters."},
-    {q: "Which device segregates broadcast domains?", choices: ["Switch","Router","Hub","Bridge"], a: 1, explain: "Routers separate broadcast domains via IP routing."},
-    {q: "Which wireless mode connects two access points wirelessly?", choices: ["Infrastructure","Ad-hoc","Mesh/Bridge","Client"], a: 2, explain: "Mesh or bridge modes connect APs to extend networks."},
-    {q: "Which port is commonly used for SMTP?", choices: ["25","110","143","3389"], a: 0, explain: "SMTP commonly uses port 25."},
-    {q: "A user reports slow performance. Which should you check first?", choices: ["Overloaded CPU/RAM/disk usage","Replace motherboard","Reinstall OS immediately","Change monitor"], a: 0, explain: "Check resource usage and background tasks first."},
-    {q: "Which RAID level provides striping with parity (single parity)?", choices: ["RAID 0","RAID 1","RAID 5","RAID 6"], a: 2, explain: "RAID 5 stripes with parity across drives."},
-    {q: "Which connector carries video only (digital)?", choices: ["DVI-D","HDMI","USB","Ethernet"], a: 0, explain: "DVI-D carries digital video without audio."},
-    {q: "Which device converts digital signals to analog for phone lines?", choices: ["Modem","Router","Switch","NIC"], a: 0, explain: "Modems modulate/demodulate signals for analog lines."},
-    {q: "Which battery keeps CMOS clock running?", choices: ["CR2032 coin cell","AA battery","9V battery","Rechargeable Li‑ion pack"], a: 0, explain: "Motherboards typically use a CR2032 coin cell battery."},
-    {q: "Which logging practice is important for troubleshooting?", choices: ["Not documenting to save time","Document steps, outcomes, and timings","Only document successful fixes","Only log network events"], a: 1, explain: "Good documentation helps future troubleshooting and audits."},
-    {q: "Which technology uses fiber optic cables?", choices: ["Ethernet over fiber","Coax cable TV only","Wireless only","Serial communication"], a: 0, explain: "Fiber optics are used for high-speed network links."},
-    {q: "Which Windows tool checks disk integrity and file system errors?", choices: ["chkdsk","sfc","ipconfig","diskpart"], a: 0, explain: "chkdsk checks disk and filesystem errors."},
-    {q: "Which adapter converts between USB and serial (RS-232)?", choices: ["Loopback adapter","USB-to-Serial adapter","Crimper","RJ45 coupler"], a: 1, explain: "USB-to-Serial adapters provide RS-232 connectivity."},
-    {q: "Which security principle limits user privileges?", choices: ["Least privilege","Zero trust only","Open access","Default admin access"], a: 0, explain: "Least privilege restricts users to required permissions."},
-    {q: "Which command traces route to destination?", choices: ["ping","tracert (Windows) / traceroute (Linux)","ipconfig","nslookup"], a: 1, explain: "tracert/traceroute shows path to destination."},
-    {q: "Which printer issue is resolved by clearing print spooler?", choices: ["Stuck print jobs preventing new prints","Paper jam","Empty toner","Driver missing"], a: 0, explain: "Clearing spooler removes stuck jobs."},
-    {q: "What is the purpose of a KVM switch?", choices: ["Manage temperature","Control multiple PCs with one keyboard/video/mouse","Network routing","Provide extra USB ports"], a: 1, explain: "KVM lets one set of peripherals control multiple systems."},
-    {q: "Which wireless security uses enterprise authentication?", choices: ["WPA2-Personal","WPA2-Enterprise","WEP","Open"], a: 1, explain: "WPA2-Enterprise uses RADIUS server authentication."},
-    {q: "Which connector is used for legacy PS/2 keyboards?", choices: ["USB","PS/2 (6-pin mini-DIN)","RJ-11","DB-25"], a: 1, explain: "PS/2 uses 6-pin mini-DIN connectors."},
-    {q: "Which device operates at Layer 2 of OSI model?", choices: ["Router","Switch","Firewall (in general)","Modem"], a: 1, explain: "Switches operate primarily at Layer 2 (data link)."},
-    {q: "Which display issue often indicates GPU driver problems?", choices: ["Artifacts, crashes under load, resolution issues","Clicking sounds","Paper jam","Slow network speeds"], a: 0, explain: "Driver issues can cause graphical artifacts and instability."},
-    {q: "Which backup rotation uses Grandfather-Father-Son scheme?", choices: ["Single full only","GFS (Grandfather-Father-Son)","RAID mirroring","Cloud-only backups"], a: 1, explain: "GFS is a common rotation strategy using full and incremental backups."},
-    {q: "Which cable type is immune to electromagnetic interference?", choices: ["Shielded copper","Twisted pair","Coax","Fiber optic"], a: 3, explain: "Fiber uses light, so it's immune to EMI."},
-    {q: "Which maintenance task improves laptop battery lifespan?", choices: ["Keep at 100% always","Avoid extreme temperatures and unfavourable charging patterns","Drain to 0% daily","Remove battery while in use always"], a: 1, explain: "Avoiding heat and extreme charge states prolongs battery life."},
-    {q: "Which tool helps recover deleted files if filesystem intact?", choices: ["Data recovery software","Replacing PSU","Overclocking","Reformat drive immediately"], a: 0, explain: "Recovery software can retrieve files if not overwritten."},
-    {q: "Which port is commonly used for RDP?", choices: ["3389","3306","21","80"], a: 0, explain: "RDP commonly uses TCP port 3389."},
-    {q: "Which component affects graphics performance most?", choices: ["CPU","RAM","GPU","PSU"], a: 2, explain: "GPU handles rendering and impacts graphics performance most."},
-    {q: "Which wireless tech uses very short range and high speed for device-to-device?", choices: ["Bluetooth","NFC","IR","802.11ax"], a: 0, explain: "Bluetooth is commonly used for short-range wireless device-to-device connections."},
-    {q: "Which common cause results in slow DNS resolution?", choices: ["High latency to DNS server, misconfiguration, ISP issues","Faulty GPU","Empty toner","Bad RAM only"], a: 0, explain: "DNS issues often stem from slow or misconfigured DNS servers."},
-    {q: "Which tool checks SMART data for drives?", choices: ["smartctl (smartmontools)","chkdsk","ipconfig","memtest86"], a: 0, explain: "smartctl reads SMART attributes to predict drive failure."},
-    {q: "What is the first step in handling a suspected hardware failure?", choices: ["Document problem and gather symptoms","Immediately replace parts","Reinstall OS","Ignore user report"], a: 0, explain: "Documenting and gathering details is crucial before changes."},
-    {q: "Which wireless standard introduced MU-MIMO improvements?", choices: ["802.11n","802.11ac","802.11ax","802.11g"], a: 1, explain: "802.11ac (Wi‑Fi 5) introduced multi-user MIMO; 802.11ax improves on it."},
-    {q: "Which protocol is used to securely transfer files?", choices: ["FTP","SFTP","Telnet","HTTP"], a: 1, explain: "SFTP uses SSH for secure file transfers."},
-    {q: "Which component should be checked for dust and airflow issues?", choices: ["PSU and case fans, heatsinks","SSD firmware","RAM ECC bits","Network cables"], a: 0, explain: "Dust buildup reduces cooling efficiency causing thermal issues."}
-  ];
-
-  // Build a larger POOL of 300 questions by cloning and lightly varying the base questions
-  const POOL = [];
-  let k = 0;
-  while(POOL.length < 300){
-    const src = BASE_POOL[k % BASE_POOL.length];
-    const variantIndex = Math.floor(k / BASE_POOL.length) + 1;
-    const clone = JSON.parse(JSON.stringify(src));
-    // append a small variant note so each question appears unique
-    if(variantIndex > 1) clone.q = `${clone.q} (variant ${variantIndex})`;
-    // rotate choices slightly to vary the correct index
-    const shift = (k % clone.choices.length);
-    clone.choices = clone.choices.slice(shift).concat(clone.choices.slice(0,shift));
-    clone.a = (src.a - shift + clone.choices.length) % clone.choices.length;
-    POOL.push(clone);
-    k++;
-  }
-
-  // ======= APP STATE =======
-  let questions = []; // selected exam questions
-  let current = 0;
-  let userAnswers = [];
-  let marked = [];
-  let timerInterval = null;
-  let timeLeft = 0; // seconds
-  let timedMode = true;
-
-  // Elements
-  const startBtn = document.getElementById("startBtn");
-  const practiceBtn = document.getElementById("practiceBtn");
-  const qcountInput = document.getElementById("qcount");
-  const minutesInput = document.getElementById("minutes");
-  const examCard = document.getElementById("examCard");
-  const quizArea = document.getElementById("quiz-area");
-  const qnum = document.getElementById("qnum");
-  const totalQ = document.getElementById("totalQ");
-  const totalQ2 = document.getElementById("totalQ2");
-  const prevBtn = document.getElementById("prevBtn");
-  const nextBtn = document.getElementById("nextBtn");
-  const submitBtn = document.getElementById("submitBtn");
-  const resetBtn = document.getElementById("resetBtn");
-  const markBtn = document.getElementById("markBtn");
-  const timerEl = document.getElementById("timer");
-  const progressBar = document.getElementById("progress-bar");
-  const progressCount = document.getElementById("progressCount");
-  const summary = document.getElementById("summary");
-
-  // Utility: shuffle array
-  function shuffle(a){
-    for(let i=a.length-1;i>0;i--){
-      const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];
-    }
-  }
-
-  function startExam(isPractice){
-    const count = Math.max(75, Math.min(90, Number(qcountInput.value) || 90));
-    const minutes = Math.max(1, Number(minutesInput.value) || 90);
-    timedMode = !isPractice;
-    // build questions by shuffling pool and taking first `count`
-    const poolCopy = POOL.slice();
-    shuffle(poolCopy);
-    questions = poolCopy.slice(0, count);
-    userAnswers = new Array(questions.length).fill(null);
-    marked = new Array(questions.length).fill(false);
-    current = 0;
-    totalQ.textContent = questions.length;
-    totalQ2.textContent = questions.length;
-    progressCount.textContent = questions.filter((a)=>a!==null).length;
-    examCard.style.display = "block";
-    summary.classList.remove("show");
-    renderQuestion(current);
-    // timer
-    if(timedMode){
-      timeLeft = Math.max(60, minutes * 60);
-      updateTimerDisplay();
-      if(timerInterval) clearInterval(timerInterval);
-      timerInterval = setInterval(()=>{
-        timeLeft--;
-        if(timeLeft <= 0){
-          clearInterval(timerInterval);
-          alert("Time is up — the exam will be submitted automatically.");
-          showSummary();
-        }
-        updateTimerDisplay();
-      },1000);
-    } else {
-      timerEl.textContent = "Practice";
-      if(timerInterval){clearInterval(timerInterval);timerInterval=null}
-    }
-  }
-
-  function updateTimerDisplay(){
-    const m = Math.floor(timeLeft/60).toString().padStart(2,"0");
-    const s = (timeLeft%60).toString().padStart(2,"0");
-    timerEl.textContent = `${m}:${s}`;
-    // progress
-    const pct = ((questions.length - (current+1)) / questions.length) * 100;
-    progressBar.style.width = ((questions.length - (questions.filter(a=>a===null).length)) / questions.length * 100) + "%";
-  }
-
-  function renderQuestion(index){
-    const data = questions[index];
-    qnum.textContent = index + 1;
-    document.getElementById("qtype").textContent = "Multiple Choice";
-    quizArea.innerHTML = `
-      <div class="question">${data.q}</div>
-      <div class="choices" role="list">
-        ${data.choices.map((c,i)=>`<button class="choice" data-choice="${i}" aria-pressed="false">${String.fromCharCode(65+i)}. ${c}</button>`).join("")}
-      </div>
-      <div class="explain" id="explain-area" aria-live="polite"></div>
-    `;
-    // restore selection style
-    const choiceBtns = quizArea.querySelectorAll('.choice');
-    choiceBtns.forEach(btn=>{
-      btn.addEventListener('click', ()=>selectChoice(index, Number(btn.dataset.choice)));
-      if(userAnswers[index] === Number(btn.dataset.choice)) btn.classList.add('correct');
-    });
-    // mark flag
-    markBtn.textContent = marked[index] ? 'Unmark' : 'Mark for Review';
-    // show feedback if answered and not practice? we allow feedback only when answered (lock)
-    if(userAnswers[index] !== null){
-      markAnswer(index, userAnswers[index], false);
-    }
-    updateTimerDisplay();
-  }
-
-  function selectChoice(qIndex, choiceIndex){
-    // prevent changing answer once selected
-    if (userAnswers[qIndex] !== null) return;
-    userAnswers[qIndex] = choiceIndex;
-    progressCount.textContent = questions.filter((_,i)=>userAnswers[i]!==null).length;
-    markAnswer(qIndex, choiceIndex, true);
-  }
-
-  function markAnswer(qIndex, choiceIndex, showExplain){
-    const container = quizArea;
-    const correctIndex = questions[qIndex].a;
-    const buttons = container.querySelectorAll('.choice');
-    buttons.forEach((b, i)=>{
-      b.classList.remove('correct','wrong');
-      // disable all choices to enforce single answer
-      b.disabled = true;
-      // keep clickable but indicate selection
-      if(Number(b.dataset.choice) === correctIndex){
-        b.classList.add('correct');
-        b.setAttribute('aria-label', b.textContent + ' correct');
-      } else if(Number(b.dataset.choice) === choiceIndex){
-        b.classList.add('wrong');
-        b.setAttribute('aria-label', b.textContent + ' your choice');
-      }
-    });
-    if(showExplain){
-      const ex = document.getElementById('explain-area');
-      ex.textContent = questions[qIndex].explain;
-    }
-  }
-
-  // Navigation
-  prevBtn.addEventListener('click', ()=>{
-    if(current === 0) return;
-    current -= 1;
-    renderQuestion(current);
-  });
-  nextBtn.addEventListener('click', ()=>{
-    if(current === questions.length - 1) return;
-    current += 1;
-    renderQuestion(current);
-  });
-
-  markBtn.addEventListener('click', ()=>{
-    marked[current] = !marked[current];
-    markBtn.textContent = marked[current] ? 'Unmark' : 'Mark for Review';
-  });
-
-  submitBtn.addEventListener('click', ()=>{
-    if(confirm('Submit exam now?')) showSummary();
-  });
-
-  resetBtn.addEventListener('click', ()=>{
-    if(!confirm('Reset the exam and return to setup?')) return;
-    if(timerInterval) clearInterval(timerInterval);
-    examCard.style.display = 'none';
-    summary.classList.remove('show');
-  });
-
-  function showSummary(){
-    if(timerInterval) clearInterval(timerInterval);
-    let score = 0;
-    const details = questions.map((q, i)=>{
-      const got = userAnswers[i];
-      const correct = q.a;
-      const ok = got === correct;
-      if(ok) score++;
-      return {num: i+1, ok, got, correct, q: q.q, explain: q.explain, choices: q.choices, flagged: marked[i]};
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${API_KEY}`
+        },
+        body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+                { role: "system", content: "You are a helpful AI assistant with broad knowledge." },
+                { role: "user", content: userText }
+            ]
+        })
     });
 
-    const pct = Math.round((score / questions.length) * 100);
-    summary.innerHTML = `
-      <div class="result">
-        <div class="badge" style="font-weight:800">Score (auto-graded): ${score}/${questions.length}</div>
-        <div style="color:var(--muted)">(${pct}%)</div>
-        <div style="margin-left:auto;color:var(--muted)">Review the items below — flagged items are highlighted.</div>
-      </div>
-      <div style="margin-top:10px">
-        ${details.map(d=>`
-          <div class="card" style="margin-top:8px;padding:12px;border-radius:8px;cursor:pointer;border:1px solid ${d.flagged? 'rgba(255,215,0,0.18)':'rgba(255,255,255,0.02)'}">
-            <div style="display:flex;align-items:center;gap:10px">
-              <div style="width:36px;height:36px;border-radius:8px;background:${d.ok? 'rgba(16,185,129,0.12)':'rgba(239,68,68,0.06)'};display:flex;align-items:center;justify-content:center;font-weight:700;color:${d.ok? 'var(--correct)':'var(--wrong)'}">${d.ok? '✓':'✕'}</div>
-              <div style="font-weight:700">Q${d.num}: ${d.q}</div>
-            </div>
-            <div style="margin-top:8px;color:var(--muted);display:none" class="detail">
-              <div><strong>Your answer:</strong> ${d.got===null? '<em>Unanswered</em>' : String.fromCharCode(65 + d.got) + '. ' + d.choices[d.got]}</div>
-              <div><strong>Correct:</strong> ${String.fromCharCode(65 + d.correct)}. ${d.choices[d.correct]}</div>
-              <div style="margin-top:6px;color:var(--muted)"><em>${d.explain}</em></div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-    summary.classList.add('show');
+    const data = await response.json();
+    chat.lastChild.remove();
 
-    // attach expand handlers
-    summary.querySelectorAll('.card').forEach(el=>{
-      el.addEventListener('click', ()=>{
-        const detail = el.querySelector('.detail');
-        detail.style.display = detail.style.display === 'block'? 'none':'block';
-      });
-    });
+    addMessage(data.choices[0].message.content, "ai");
+}
 
-    summary.scrollIntoView({behavior:'smooth'});
-  }
+function addMessage(text, type) {
+    const chat = document.getElementById("chat");
+    const msg = document.createElement("div");
+    msg.className = "message " + type;
+    msg.innerText = text;
+    chat.appendChild(msg);
+    chat.scrollTop = chat.scrollHeight;
+}
+</script>
 
-  // Start handlers
-  startBtn.addEventListener('click', ()=>startExam(false));
-  practiceBtn.addEventListener('click', ()=>startExam(true));
-
-  // initial small render (setup only)
-  </script>
 </body>
 </html>
