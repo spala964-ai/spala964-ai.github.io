@@ -1,181 +1,1099 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Universal AI Assistant</title>
-<style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-.ai-container {
-    width: 420px;
-    background: #111;
-    border-radius: 12px;
-    box-shadow: 0 0 25px rgba(0,255,255,0.4);
-    display: flex;
-    flex-direction: column;
-    height: 600px;
-}
-.header {
-    padding: 15px;
-    text-align: center;
-    background: #00ffff;
-    color: #000;
-    font-weight: bold;
-    border-radius: 12px 12px 0 0;
-}
-.chat {
-    flex: 1;
-    padding: 15px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-}
-.message {
-    margin-bottom: 12px;
-    padding: 10px 14px;
-    border-radius: 12px;
-    max-width: 80%;
-    word-wrap: break-word;
-}
-.user {
-    background: #00ffff;
-    color: #000;
-    align-self: flex-end;
-    border-bottom-right-radius: 4px;
-}
-.ai {
-    background: #333;
-    color: white;
-    align-self: flex-start;
-    border-bottom-left-radius: 4px;
-}
-.input-area {
-    display: flex;
-    padding: 10px;
-    border-top: 1px solid #333;
-    background: #111;
-}
-input {
-    flex: 1;
-    padding: 12px;
-    border-radius: 8px;
-    border: none;
-    outline: none;
-    background: #222;
-    color: white;
-}
-button {
-    margin-left: 8px;
-    padding: 12px 20px;
-    background: #00ffff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    color: #000;
-}
-button:hover {
-    background: #00cccc;
-}
-</style>
-</head>
-<body>
-<div class="ai-container">
-    <div class="header">🌐 Universal AI Assistant</div>
-    <div class="chat" id="chat"></div>
-    <div class="input-area">
-        <input type="text" id="userInput" placeholder="Ask me anything..." autocomplete="off">
-        <button onclick="sendMessage()">Send</button>
-    </div>
-</div>
-
-<script>
-// Prompt for API key on load (safe for testing only)
-let API_KEY = localStorage.getItem('openai_api_key') || prompt("🔑 Enter your OpenAI API key (starts with sk-...):\nGet it from https://platform.openai.com/api-keys");
-
-if (API_KEY) {
-    localStorage.setItem('openai_api_key', API_KEY); // Remember it for this browser
-}
-
-async function sendMessage() {
-    const input = document.getElementById("userInput");
-    const chat = document.getElementById("chat");
-    const userText = input.value.trim();
-
-    if (!userText) return;
-
-    if (!API_KEY || !API_KEY.startsWith("sk-")) {
-        addMessage("❌ Error: Invalid or missing API key. Please refresh and enter a valid one.", "ai");
-        return;
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CompTIA A+ Core 2 Quiz</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+      font-family: 'Roboto Mono', monospace;
+    }
+    
+    .quiz-container {
+      transition: opacity 0.3s ease;
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.4s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .option-card {
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .option-card:hover {
+      transform: translateX(4px);
+    }
+    
+    .option-card.selected {
+      border-color: #3b82f6;
+      background-color: #eff6ff;
+    }
+    
+    .option-card.correct {
+      border-color: #10b981;
+      background-color: #d1fae5;
+    }
+    
+    .option-card.incorrect {
+      border-color: #ef4444;
+      background-color: #fee2e2;
+    }
+    
+    .lab-terminal {
+      background: #1e293b;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      color: #10b981;
     }
 
-    // Add user message
-    addMessage(userText, "user");
-    input.value = "";
+    .scenario-box {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full">
+  <div id="app" class="w-full h-full"></div>
+  <script>
+    const defaultConfig = {
+      main_title: "CompTIA A+ Core 2 Quiz",
+      subtitle: "Master your certification with 500+ practice questions",
+      start_button: "Start Quiz",
+      submit_button: "Submit Answer",
+      next_button: "Next Question",
+      background_color: "#0f172a",
+      surface_color: "#1e293b",
+      text_color: "#e2e8f0",
+      primary_action_color: "#8b5cf6",
+      secondary_action_color: "#64748b",
+      font_family: "Roboto Mono",
+      font_size: 16
+    };
 
-    // Add temporary "Thinking..." message
-    const thinkingMsg = addMessage("Thinking...", "ai");
+    const mcQuestions = [
+      // Windows Installation & Configuration
+      { q: "Which Windows edition includes BitLocker encryption?", options: ["Home", "Pro", "Starter", "Basic"], answer: 1, category: "Windows" },
+      { q: "What is the minimum RAM requirement for Windows 10 64-bit?", options: ["1 GB", "2 GB", "4 GB", "8 GB"], answer: 1, category: "Windows" },
+      { q: "Which tool is used to create a system image backup in Windows?", options: ["Disk Cleanup", "Backup and Restore", "Disk Management", "Task Manager"], answer: 1, category: "Windows" },
+      { q: "What command opens the Windows Registry Editor?", options: ["msconfig", "regedit", "services.msc", "gpedit.msc"], answer: 1, category: "Windows" },
+      { q: "Which Windows feature allows running older programs?", options: ["Safe Mode", "Compatibility Mode", "Legacy Mode", "Virtual Mode"], answer: 1, category: "Windows" },
+      { q: "What is the default boot menu key for most systems?", options: ["F2", "F8", "F12", "Del"], answer: 2, category: "Windows" },
+      { q: "Which partition style supports drives over 2TB?", options: ["MBR", "GPT", "FAT32", "NTFS"], answer: 1, category: "Windows" },
+      { q: "What command checks and repairs system files?", options: ["chkdsk", "sfc /scannow", "diskpart", "defrag"], answer: 1, category: "Windows" },
+      { q: "Which Windows tool manages startup programs?", options: ["msconfig", "services.msc", "regedit", "perfmon"], answer: 0, category: "Windows" },
+      { q: "What is the purpose of Windows Update?", options: ["Backup files", "Install patches", "Defragment drives", "Clean registry"], answer: 1, category: "Windows" },
+      
+      // Security
+      { q: "What type of malware encrypts files for ransom?", options: ["Trojan", "Ransomware", "Spyware", "Adware"], answer: 1, category: "Security" },
+      { q: "Which protocol encrypts web traffic?", options: ["HTTP", "FTP", "HTTPS", "SMTP"], answer: 2, category: "Security" },
+      { q: "What is two-factor authentication?", options: ["Two passwords", "Password + biometric", "Two usernames", "Dual firewalls"], answer: 1, category: "Security" },
+      { q: "Which Windows feature blocks unauthorized access?", options: ["Defender", "Firewall", "BitLocker", "Updates"], answer: 1, category: "Security" },
+      { q: "What is the principle of least privilege?", options: ["Admin access for all", "Minimum required access", "No access", "Guest access"], answer: 1, category: "Security" },
+      { q: "Which port does RDP use by default?", options: ["22", "80", "443", "3389"], answer: 3, category: "Security" },
+      { q: "What is a zero-day exploit?", options: ["Old vulnerability", "Unknown vulnerability", "Fixed vulnerability", "Documented vulnerability"], answer: 1, category: "Security" },
+      { q: "Which encryption standard is most secure?", options: ["WEP", "WPA", "WPA2", "WPA3"], answer: 3, category: "Security" },
+      { q: "What is phishing?", options: ["Virus", "Social engineering", "Hardware attack", "DOS attack"], answer: 1, category: "Security" },
+      { q: "Which tool scans for malware?", options: ["Firewall", "Antivirus", "VPN", "Proxy"], answer: 1, category: "Security" },
+      
+      // Networking
+      { q: "What is the default subnet mask for Class C?", options: ["255.0.0.0", "255.255.0.0", "255.255.255.0", "255.255.255.255"], answer: 2, category: "Networking" },
+      { q: "Which command displays IP configuration?", options: ["ping", "ipconfig", "tracert", "nslookup"], answer: 1, category: "Networking" },
+      { q: "What does DNS resolve?", options: ["MAC to IP", "IP to MAC", "Domain to IP", "Port to IP"], answer: 2, category: "Networking" },
+      { q: "Which protocol is connectionless?", options: ["TCP", "UDP", "FTP", "SMTP"], answer: 1, category: "Networking" },
+      { q: "What is a private IP range?", options: ["1.0.0.0", "10.0.0.0", "172.32.0.0", "192.169.0.0"], answer: 1, category: "Networking" },
+      { q: "Which device operates at Layer 2?", options: ["Router", "Switch", "Hub", "Modem"], answer: 1, category: "Networking" },
+      { q: "What does DHCP provide?", options: ["Routing", "IP addresses", "Encryption", "Authentication"], answer: 1, category: "Networking" },
+      { q: "Which command tests connectivity?", options: ["ipconfig", "ping", "netstat", "route"], answer: 1, category: "Networking" },
+      { q: "What is the loopback address?", options: ["192.168.1.1", "127.0.0.1", "10.0.0.1", "0.0.0.0"], answer: 1, category: "Networking" },
+      { q: "Which port does HTTP use?", options: ["21", "22", "80", "443"], answer: 2, category: "Networking" },
+      
+      // Mobile Devices
+      { q: "What is MDM?", options: ["Memory Data Management", "Mobile Device Management", "Multi-Device Mode", "Master Data Module"], answer: 1, category: "Mobile" },
+      { q: "Which connector type is reversible?", options: ["Micro USB", "Mini USB", "USB-C", "Lightning"], answer: 2, category: "Mobile" },
+      { q: "What is airplane mode?", options: ["Fast charging", "Disables wireless", "Power saving", "Silent mode"], answer: 1, category: "Mobile" },
+      { q: "Which mobile OS is open source?", options: ["iOS", "Android", "Windows Phone", "BlackBerry"], answer: 1, category: "Mobile" },
+      { q: "What is tethering?", options: ["Charging phone", "Sharing internet", "Syncing data", "Pairing Bluetooth"], answer: 1, category: "Mobile" },
+      { q: "Which feature allows remote wipe?", options: ["Find My", "Backup", "VPN", "Hotspot"], answer: 0, category: "Mobile" },
+      { q: "What is NFC used for?", options: ["Charging", "Close-range data", "GPS", "Camera"], answer: 1, category: "Mobile" },
+      { q: "Which backup method is cloud-based?", options: ["iTunes", "iCloud", "USB", "SD card"], answer: 1, category: "Mobile" },
+      { q: "What is jailbreaking?", options: ["Factory reset", "Removing OS restrictions", "Unlocking SIM", "Installing updates"], answer: 1, category: "Mobile" },
+      { q: "Which protocol syncs email?", options: ["FTP", "IMAP", "DNS", "DHCP"], answer: 1, category: "Mobile" },
+      
+      // Troubleshooting
+      { q: "What does a blue screen indicate?", options: ["Hardware failure", "System crash", "Virus", "Update needed"], answer: 1, category: "Troubleshooting" },
+      { q: "Which mode starts Windows with minimal drivers?", options: ["Recovery Mode", "Safe Mode", "Debug Mode", "Clean Boot"], answer: 1, category: "Troubleshooting" },
+      { q: "What is the first step in troubleshooting?", options: ["Replace parts", "Identify problem", "Test solution", "Document"], answer: 1, category: "Troubleshooting" },
+      { q: "Which tool checks disk errors?", options: ["defrag", "chkdsk", "sfc", "diskpart"], answer: 1, category: "Troubleshooting" },
+      { q: "What causes a 'bootmgr is missing' error?", options: ["Bad RAM", "Corrupt boot sector", "CPU failure", "Power supply"], answer: 1, category: "Troubleshooting" },
+      { q: "Which logs show system errors?", options: ["Device Manager", "Event Viewer", "Task Manager", "Resource Monitor"], answer: 1, category: "Troubleshooting" },
+      { q: "What is a POST code?", options: ["Boot error", "Hardware test result", "BIOS password", "Windows key"], answer: 1, category: "Troubleshooting" },
+      { q: "Which component causes overheating shutdowns?", options: ["HDD", "RAM", "CPU", "NIC"], answer: 2, category: "Troubleshooting" },
+      { q: "What does a continuous beep indicate?", options: ["CPU failure", "RAM issue", "PSU failure", "HDD error"], answer: 1, category: "Troubleshooting" },
+      { q: "Which tool shows running processes?", options: ["Services", "Task Manager", "msconfig", "Performance Monitor"], answer: 1, category: "Troubleshooting" },
+      
+      // Additional Windows questions
+      { q: "What is the Windows command prompt executable?", options: ["powershell.exe", "cmd.exe", "terminal.exe", "shell.exe"], answer: 1, category: "Windows" },
+      { q: "Which tool manages Windows services?", options: ["msconfig", "services.msc", "taskschd.msc", "compmgmt.msc"], answer: 1, category: "Windows" },
+      { q: "What does UAC stand for?", options: ["User Account Control", "Universal Access Control", "Unified Admin Console", "User Authentication Center"], answer: 0, category: "Windows" },
+      { q: "Which file system supports file permissions?", options: ["FAT", "FAT32", "NTFS", "exFAT"], answer: 2, category: "Windows" },
+      { q: "What is the maximum file size for FAT32?", options: ["2 GB", "4 GB", "8 GB", "16 GB"], answer: 1, category: "Windows" },
+      { q: "Which tool defragments hard drives?", options: ["Disk Cleanup", "Disk Defragmenter", "Disk Management", "Disk Check"], answer: 1, category: "Windows" },
+      { q: "What is Windows System Restore?", options: ["Backup tool", "Recovery point creator", "Antivirus", "Update manager"], answer: 1, category: "Windows" },
+      { q: "Which command opens Device Manager?", options: ["devmgmt.msc", "devman.msc", "devices.msc", "hwmgr.msc"], answer: 0, category: "Windows" },
+      { q: "What is the purpose of pagefile.sys?", options: ["System files", "Virtual memory", "Backup data", "Cache"], answer: 1, category: "Windows" },
+      { q: "Which Windows feature creates virtual machines?", options: ["VMware", "Hyper-V", "VirtualBox", "Parallels"], answer: 1, category: "Windows" },
+      
+      // Additional Security questions
+      { q: "What is a DMZ in networking?", options: ["Demilitarized Zone", "Data Management Zone", "Direct Memory Zone", "Default Monitoring Zone"], answer: 0, category: "Security" },
+      { q: "Which authentication uses physical characteristics?", options: ["Password", "PIN", "Biometric", "Token"], answer: 2, category: "Security" },
+      { q: "What is a MAC address filter?", options: ["Email filter", "Hardware address filter", "IP filter", "Port filter"], answer: 1, category: "Security" },
+      { q: "Which protocol encrypts email?", options: ["SMTP", "POP3", "SSL/TLS", "IMAP"], answer: 2, category: "Security" },
+      { q: "What is social engineering?", options: ["Hardware hack", "Psychological manipulation", "Software exploit", "Network attack"], answer: 1, category: "Security" },
+      { q: "Which backup type copies only changed files?", options: ["Full", "Incremental", "Differential", "Copy"], answer: 1, category: "Security" },
+      { q: "What is a honeypot?", options: ["Backup system", "Decoy system", "Firewall", "Antivirus"], answer: 1, category: "Security" },
+      { q: "Which principle limits data access duration?", options: ["Least privilege", "Time-based access", "Role-based access", "Mandatory access"], answer: 1, category: "Security" },
+      { q: "What is credential stuffing?", options: ["Using stolen passwords", "Guessing passwords", "Creating fake accounts", "Phishing"], answer: 0, category: "Security" },
+      { q: "Which device filters network traffic by rules?", options: ["Router", "Switch", "Firewall", "Hub"], answer: 2, category: "Security" },
+      
+      // Additional Networking questions
+      { q: "What does NAT do?", options: ["Translates IPs", "Routes packets", "Encrypts data", "Filters traffic"], answer: 0, category: "Networking" },
+      { q: "Which cable type uses light?", options: ["Coaxial", "Fiber optic", "Twisted pair", "Serial"], answer: 1, category: "Networking" },
+      { q: "What is SSID?", options: ["Network name", "Password", "IP address", "MAC address"], answer: 0, category: "Networking" },
+      { q: "Which protocol transfers files?", options: ["HTTP", "FTP", "SMTP", "DNS"], answer: 1, category: "Networking" },
+      { q: "What does ARP resolve?", options: ["IP to MAC", "Domain to IP", "MAC to IP", "Port to IP"], answer: 0, category: "Networking" },
+      { q: "Which topology connects all devices to a central point?", options: ["Bus", "Ring", "Star", "Mesh"], answer: 2, category: "Networking" },
+      { q: "What is bandwidth?", options: ["Data capacity", "Signal strength", "Network speed", "Latency"], answer: 0, category: "Networking" },
+      { q: "Which command shows network routes?", options: ["ipconfig", "tracert", "netstat", "route print"], answer: 3, category: "Networking" },
+      { q: "What is QoS?", options: ["Quality of Service", "Quick Online Service", "Quantum OS System", "Query Output Standard"], answer: 0, category: "Networking" },
+      { q: "Which device amplifies wireless signal?", options: ["Router", "Switch", "Repeater", "Modem"], answer: 2, category: "Networking" },
+      
+      // Additional Mobile questions
+      { q: "What is baseband update?", options: ["OS update", "Cellular radio firmware", "App update", "Security patch"], answer: 1, category: "Mobile" },
+      { q: "Which feature tracks device location?", options: ["GPS", "NFC", "Bluetooth", "WiFi"], answer: 0, category: "Mobile" },
+      { q: "What is a SIM card?", options: ["Storage card", "Subscriber identity module", "System interface module", "Security identification method"], answer: 1, category: "Mobile" },
+      { q: "Which protocol pairs Bluetooth devices?", options: ["Pairing protocol", "PAN", "Bluetooth pairing", "Device discovery"], answer: 2, category: "Mobile" },
+      { q: "What is rooting (Android)?", options: ["Factory reset", "Gaining admin access", "Installing apps", "Backing up"], answer: 1, category: "Mobile" },
+      { q: "Which cloud service syncs Apple devices?", options: ["OneDrive", "Google Drive", "iCloud", "Dropbox"], answer: 2, category: "Mobile" },
+      { q: "What is VPN used for on mobile?", options: ["Faster internet", "Secure connection", "More storage", "Better signal"], answer: 1, category: "Mobile" },
+      { q: "Which email protocol leaves messages on server?", options: ["POP3", "IMAP", "SMTP", "Exchange"], answer: 1, category: "Mobile" },
+      { q: "What is screen mirroring?", options: ["Taking screenshot", "Duplicating display", "Sharing files", "Video call"], answer: 1, category: "Mobile" },
+      { q: "Which battery technology is common in smartphones?", options: ["NiCd", "NiMH", "Li-ion", "Alkaline"], answer: 2, category: "Mobile" },
+      
+      // Additional Troubleshooting questions
+      { q: "What causes 'No boot device'?", options: ["Bad RAM", "Failed hard drive", "Bad PSU", "CPU failure"], answer: 1, category: "Troubleshooting" },
+      { q: "Which tool repairs boot files?", options: ["chkdsk", "sfc", "bootrec", "diskpart"], answer: 2, category: "Troubleshooting" },
+      { q: "What does spinning hard drive indicate?", options: ["Drive is working", "Drive is failing", "Drive needs format", "Drive is empty"], answer: 0, category: "Troubleshooting" },
+      { q: "Which symptom indicates bad RAM?", options: ["BSOD", "No display", "Random crashes", "All of the above"], answer: 3, category: "Troubleshooting" },
+      { q: "What is a kernel panic?", options: ["Windows error", "Linux/Mac crash", "BIOS error", "Driver issue"], answer: 1, category: "Troubleshooting" },
+      { q: "Which tool shows network adapter status?", options: ["Device Manager", "Network Manager", "ipconfig", "ping"], answer: 0, category: "Troubleshooting" },
+      { q: "What causes frequent application crashes?", options: ["CPU overheating", "Bad RAM", "Corrupt files", "All of the above"], answer: 3, category: "Troubleshooting" },
+      { q: "Which command repairs Windows image?", options: ["sfc", "DISM", "chkdsk", "bootrec"], answer: 1, category: "Troubleshooting" },
+      { q: "What does clicking sound from HDD indicate?", options: ["Normal operation", "Mechanical failure", "Needs defrag", "Low space"], answer: 1, category: "Troubleshooting" },
+      { q: "Which mode starts Windows networking?", options: ["Safe Mode", "Safe Mode with Networking", "Recovery Mode", "Debug Mode"], answer: 1, category: "Troubleshooting" },
+      
+      // Linux/macOS questions
+      { q: "Which command lists directory contents in Linux?", options: ["dir", "ls", "list", "show"], answer: 1, category: "Operating Systems" },
+      { q: "What is the Linux superuser account?", options: ["admin", "root", "sudo", "super"], answer: 1, category: "Operating Systems" },
+      { q: "Which macOS feature is similar to Windows backup?", options: ["Time Machine", "Backup Pro", "Mac Backup", "System Restore"], answer: 0, category: "Operating Systems" },
+      { q: "What is the Linux equivalent of Task Manager?", options: ["top", "ps", "htop", "All of the above"], answer: 3, category: "Operating Systems" },
+      { q: "Which command changes file permissions in Linux?", options: ["chown", "chmod", "chgrp", "chperm"], answer: 1, category: "Operating Systems" },
+      { q: "What is Bash?", options: ["Text editor", "Command shell", "File manager", "Backup tool"], answer: 1, category: "Operating Systems" },
+      { q: "Which Linux command copies files?", options: ["copy", "cp", "duplicate", "move"], answer: 1, category: "Operating Systems" },
+      { q: "What is macOS Keychain?", options: ["Password manager", "File encryption", "Backup tool", "Network manager"], answer: 0, category: "Operating Systems" },
+      { q: "Which command shows running processes?", options: ["show", "ps", "proc", "run"], answer: 1, category: "Operating Systems" },
+      { q: "What is sudo in Linux?", options: ["Super do", "Superuser do", "System do", "Secure do"], answer: 1, category: "Operating Systems" },
+      
+      // Scripting questions
+      { q: "What is PowerShell?", options: ["Text editor", "Scripting language", "Backup tool", "Antivirus"], answer: 1, category: "Scripting" },
+      { q: "Which file extension is PowerShell script?", options: [".ps", ".psh", ".ps1", ".pws"], answer: 2, category: "Scripting" },
+      { q: "What does batch file end with?", options: [".bat", ".batch", ".cmd", "Both .bat and .cmd"], answer: 3, category: "Scripting" },
+      { q: "Which symbol starts a comment in batch?", options: ["#", "//", "REM", "/*"], answer: 2, category: "Scripting" },
+      { q: "What is a bash script extension?", options: [".bash", ".sh", ".script", ".bsh"], answer: 1, category: "Scripting" },
+      { q: "Which command runs PowerShell script?", options: ["run", "execute", "Start-Script", "./script.ps1"], answer: 3, category: "Scripting" },
+      { q: "What is Python used for?", options: ["Only web dev", "Scripting & automation", "Only gaming", "Only databases"], answer: 1, category: "Scripting" },
+      { q: "Which symbol starts PowerShell variable?", options: ["@", "$", "%", "#"], answer: 1, category: "Scripting" },
+      { q: "What is an if statement?", options: ["Loop", "Conditional", "Function", "Variable"], answer: 1, category: "Scripting" },
+      { q: "Which loop repeats code?", options: ["if", "for", "switch", "case"], answer: 1, category: "Scripting" },
+      
+      // Cloud & Virtualization
+      { q: "What is IaaS?", options: ["Infrastructure as a Service", "Internet as a Service", "Integration as a Service", "Interface as a Service"], answer: 0, category: "Cloud" },
+      { q: "Which is a cloud storage service?", options: ["OneDrive", "Outlook", "Teams", "Skype"], answer: 0, category: "Cloud" },
+      { q: "What is a hypervisor?", options: ["Antivirus", "VM manager", "Firewall", "Router"], answer: 1, category: "Cloud" },
+      { q: "Which type is public cloud?", options: ["Private datacenter", "Microsoft Azure", "Local server", "Personal computer"], answer: 1, category: "Cloud" },
+      { q: "What is SaaS?", options: ["Storage as a Service", "Software as a Service", "Security as a Service", "Server as a Service"], answer: 1, category: "Cloud" },
+      { q: "Which VM software is free?", options: ["VMware Workstation Pro", "VirtualBox", "Parallels", "Hyper-V Pro"], answer: 1, category: "Cloud" },
+      { q: "What is cloud synchronization?", options: ["Backing up to cloud", "Keeping files updated across devices", "Uploading to server", "Downloading from cloud"], answer: 1, category: "Cloud" },
+      { q: "Which protocol accesses cloud storage?", options: ["FTP", "HTTP/HTTPS", "SMTP", "DNS"], answer: 1, category: "Cloud" },
+      { q: "What is metered utilization?", options: ["Pay per use", "Unlimited access", "Fixed pricing", "Free service"], answer: 0, category: "Cloud" },
+      { q: "Which is private cloud benefit?", options: ["Cheap", "Public access", "More control", "No maintenance"], answer: 2, category: "Cloud" },
+      
+      // Remote Access
+      { q: "What is RDP?", options: ["Remote Desktop Protocol", "Remote Data Protocol", "Rapid Desktop Protocol", "Remote Drive Protocol"], answer: 0, category: "Remote Access" },
+      { q: "Which port does SSH use?", options: ["21", "22", "23", "3389"], answer: 1, category: "Remote Access" },
+      { q: "What is VNC?", options: ["Virtual Network Computer", "Virtual Network Connection", "Very New Connection", "Visual Network Control"], answer: 0, category: "Remote Access" },
+      { q: "Which protocol is secure for remote access?", options: ["Telnet", "SSH", "FTP", "HTTP"], answer: 1, category: "Remote Access" },
+      { q: "What is screen sharing?", options: ["File transfer", "Remote viewing", "Video call", "Chat"], answer: 1, category: "Remote Access" },
+      { q: "Which Windows feature enables RDP?", options: ["Remote Desktop", "Remote Assistance", "Quick Assist", "All of the above"], answer: 3, category: "Remote Access" },
+      { q: "What is remote assistance?", options: ["Self-help", "Technician helps remotely", "Auto-fix", "Phone support"], answer: 1, category: "Remote Access" },
+      { q: "Which requires faster internet?", options: ["File transfer", "Remote desktop", "Email", "Chat"], answer: 1, category: "Remote Access" },
+      { q: "What is TeamViewer?", options: ["Antivirus", "Remote access tool", "Firewall", "Backup tool"], answer: 1, category: "Remote Access" },
+      { q: "Which protocol is unencrypted?", options: ["SSH", "RDP", "Telnet", "VNC with encryption"], answer: 2, category: "Remote Access" },
+      
+      // Documentation & Procedures
+      { q: "What should change management include?", options: ["Only date", "Purpose, scope, and rollback plan", "Just approval", "Only impact"], answer: 1, category: "Documentation" },
+      { q: "Which documentation tracks issues?", options: ["Inventory", "Ticketing system", "Network diagram", "Procedure manual"], answer: 1, category: "Documentation" },
+      { q: "What is asset management?", options: ["Fixing computers", "Tracking hardware/software", "Managing passwords", "Installing updates"], answer: 1, category: "Documentation" },
+      { q: "Which includes step-by-step instructions?", options: ["Policy", "Procedure", "Guideline", "Standard"], answer: 1, category: "Documentation" },
+      { q: "What is SLA?", options: ["Service Level Agreement", "Software License Agreement", "System Login Access", "Secure Level Authentication"], answer: 0, category: "Documentation" },
+      { q: "Which document describes network layout?", options: ["Network policy", "Network diagram", "IP schema", "Cable map"], answer: 1, category: "Documentation" },
+      { q: "What should incident reports include?", options: ["Only time", "Problem, cause, and solution", "Just who reported", "Only date"], answer: 1, category: "Documentation" },
+      { q: "Which tracks software licenses?", options: ["Inventory management", "License compliance", "Asset tracking", "All of the above"], answer: 3, category: "Documentation" },
+      { q: "What is knowledge base?", options: ["Database", "Solutions repository", "Backup system", "Training manual"], answer: 1, category: "Documentation" },
+      { q: "Which requires formal approval?", options: ["Email", "Change request", "Chat message", "Phone call"], answer: 1, category: "Documentation" },
+      
+      // Communication & Professionalism
+      { q: "What is active listening?", options: ["Interrupting", "Understanding fully", "Talking more", "Ignoring"], answer: 1, category: "Professionalism" },
+      { q: "Which is professional communication?", options: ["Using jargon", "Clear and simple", "Technical only", "Rushed"], answer: 1, category: "Professionalism" },
+      { q: "What should you do with angry customer?", options: ["Argue back", "Stay calm", "Ignore", "Disconnect"], answer: 1, category: "Professionalism" },
+      { q: "Which demonstrates respect?", options: ["Interrupting", "Being on time", "Talking over", "Ignoring"], answer: 1, category: "Professionalism" },
+      { q: "What is appropriate attire?", options: ["Depends on workplace", "Always casual", "Always formal", "Never matters"], answer: 0, category: "Professionalism" },
+      { q: "How to handle confidential data?", options: ["Share freely", "Follow company policy", "Post online", "Tell friends"], answer: 1, category: "Professionalism" },
+      { q: "What shows professionalism?", options: ["Being late", "Meeting deadlines", "Poor communication", "Ignoring emails"], answer: 1, category: "Professionalism" },
+      { q: "Which is prohibited behavior?", options: ["Helping colleagues", "Proper dress", "Harassment", "Being on time"], answer: 2, category: "Professionalism" },
+      { q: "What to do if you don't know answer?", options: ["Make it up", "Admit and research", "Ignore question", "Blame others"], answer: 1, category: "Professionalism" },
+      { q: "Which builds customer trust?", options: ["Honesty", "False promises", "Avoiding", "Blaming"], answer: 0, category: "Professionalism" },
+      
+      // Additional varied questions
+      { q: "What is Group Policy?", options: ["User groups", "Configuration management", "Security group", "Email groups"], answer: 1, category: "Windows" },
+      { q: "Which command joins domain?", options: ["netdom", "sysdm.cpl", "domain.msc", "joindomain"], answer: 1, category: "Windows" },
+      { q: "What is Windows domain?", options: ["Website address", "Network of computers", "Email domain", "DNS zone"], answer: 1, category: "Windows" },
+      { q: "Which stores user profiles on server?", options: ["Local profile", "Roaming profile", "Temporary profile", "Guest profile"], answer: 1, category: "Windows" },
+      { q: "What is HomeGroup?", options: ["User group", "Home network sharing", "Domain group", "Security group"], answer: 1, category: "Windows" },
+      { q: "Which maps network drive?", options: ["net use", "netsh", "netstat", "netmap"], answer: 0, category: "Windows" },
+      { q: "What is UNC path?", options: ["C:\\folder", "\\\\server\\share", "/server/share", "server:share"], answer: 1, category: "Windows" },
+      { q: "Which creates shared folder?", options: ["File Explorer", "Shared Folders snap-in", "net share", "All of the above"], answer: 3, category: "Windows" },
+      { q: "What is NTFS permission?", options: ["File access control", "Network protocol", "Backup type", "Encryption"], answer: 0, category: "Windows" },
+      { q: "Which permission allows everything?", options: ["Read", "Write", "Modify", "Full Control"], answer: 3, category: "Windows" },
+      
+      // Printers
+      { q: "What is print spooler?", options: ["Printer memory", "Print queue manager", "Printer driver", "Print language"], answer: 1, category: "Printers" },
+      { q: "Which protocol shares network printers?", options: ["IPP", "FTP", "SMTP", "DNS"], answer: 0, category: "Printers" },
+      { q: "What is duplex printing?", options: ["Color printing", "Both sides", "Large format", "Photo printing"], answer: 1, category: "Printers" },
+      { q: "Which printer uses toner?", options: ["Inkjet", "Dot matrix", "Laser", "Thermal"], answer: 2, category: "Printers" },
+      { q: "What causes paper jams?", options: ["Humid paper", "Wrong type", "Multiple sheets", "All of the above"], answer: 3, category: "Printers" },
+      { q: "Which cleans laser printer?", options: ["Water", "Alcohol", "Maintenance kit", "Compressed air only"], answer: 2, category: "Printers" },
+      { q: "What is PCL?", options: ["Printer cable", "Print language", "Printer component", "Paper configuration"], answer: 1, category: "Printers" },
+      { q: "Which printer is impact?", options: ["Laser", "Inkjet", "Dot matrix", "Thermal"], answer: 2, category: "Printers" },
+      { q: "What measures print speed?", options: ["DPI", "PPM", "RPM", "BPS"], answer: 1, category: "Printers" },
+      { q: "Which indicates toner low?", options: ["Beeping", "Faded prints", "Paper jams", "Error lights"], answer: 1, category: "Printers" },
+      
+      // More Security questions
+      { q: "What is EMET?", options: ["Encryption tool", "Exploit mitigation", "Email filter", "Error manager"], answer: 1, category: "Security" },
+      { q: "Which prevents brute force?", options: ["Firewall", "Account lockout", "Antivirus", "VPN"], answer: 1, category: "Security" },
+      { q: "What is sandboxing?", options: ["Beach game", "Isolated environment", "Backup method", "Network zone"], answer: 1, category: "Security" },
+      { q: "Which detects intrusions?", options: ["IDS", "IPS", "Both", "Firewall"], answer: 2, category: "Security" },
+      { q: "What is penetration testing?", options: ["Breaking hardware", "Authorized hacking", "Installing software", "Network scanning"], answer: 1, category: "Security" },
+      { q: "Which protocol secures DNS?", options: ["DHCP", "DNSSEC", "DNS+", "SDNS"], answer: 1, category: "Security" },
+      { q: "What is data loss prevention?", options: ["Backup", "Preventing unauthorized data transfer", "Encryption", "Access control"], answer: 1, category: "Security" },
+      { q: "Which authenticator generates codes?", options: ["Password", "Token", "Biometric", "PIN"], answer: 1, category: "Security" },
+      { q: "What is access control list?", options: ["User list", "Permission rules", "Network devices", "Backup list"], answer: 1, category: "Security" },
+      { q: "Which prevents email spoofing?", options: ["SPF", "SMTP", "POP3", "IMAP"], answer: 0, category: "Security" },
+      
+      // Additional Windows Administration
+      { q: "What is Task Scheduler?", options: ["RAM manager", "Automated tasks", "Process viewer", "Startup manager"], answer: 1, category: "Windows" },
+      { q: "Which creates restore point?", options: ["System Restore", "Backup", "System Image", "File History"], answer: 0, category: "Windows" },
+      { q: "What is Windows PE?", options: ["Professional Edition", "Preinstallation Environment", "Performance Edition", "Premium Edition"], answer: 1, category: "Windows" },
+      { q: "Which tool creates bootable USB?", options: ["diskpart", "Media Creation Tool", "Device Manager", "Disk Management"], answer: 1, category: "Windows" },
+      { q: "What is sysprep?", options: ["System preparation", "System repair", "System preferences", "System properties"], answer: 0, category: "Windows" },
+      { q: "Which command shows system info?", options: ["info", "systeminfo", "sysinfo", "system"], answer: 1, category: "Windows" },
+      { q: "What is WinRE?", options: ["Windows Recovery Environment", "Windows Remote Environment", "Windows Restore Edition", "Windows Repair Executable"], answer: 0, category: "Windows" },
+      { q: "Which manages startup services?", options: ["services.msc", "msconfig", "Both", "Neither"], answer: 2, category: "Windows" },
+      { q: "What is DxDiag?", options: ["Disk diagnostic", "DirectX diagnostic", "Device diagnostic", "Driver diagnostic"], answer: 1, category: "Windows" },
+      { q: "Which shows disk usage?", options: ["Disk Cleanup", "Resource Monitor", "Disk Management", "All of the above"], answer: 3, category: "Windows" },
+      
+      // Email & Collaboration
+      { q: "What port does SMTP use?", options: ["25", "110", "143", "993"], answer: 0, category: "Networking" },
+      { q: "Which protocol retrieves email?", options: ["SMTP", "POP3", "SNMP", "DHCP"], answer: 1, category: "Networking" },
+      { q: "What is IMAP advantage over POP3?", options: ["Faster", "Keeps email on server", "More secure", "Uses less data"], answer: 1, category: "Networking" },
+      { q: "Which port is secure IMAP?", options: ["143", "993", "995", "587"], answer: 1, category: "Networking" },
+      { q: "What is Exchange Server?", options: ["Stock market", "Email server", "File server", "Web server"], answer: 1, category: "Networking" },
+      { q: "Which syncs calendar and contacts?", options: ["POP3", "IMAP", "Exchange/ActiveSync", "SMTP"], answer: 2, category: "Networking" },
+      { q: "What is S/MIME?", options: ["Email protocol", "Email encryption", "Email server", "Email client"], answer: 1, category: "Security" },
+      { q: "Which prevents spam?", options: ["Antivirus", "Spam filter", "Firewall", "VPN"], answer: 1, category: "Security" },
+      { q: "What is email forwarding?", options: ["Sending to multiple", "Auto-redirect", "Reply all", "CC"], answer: 1, category: "Networking" },
+      { q: "Which shows all recipients?", options: ["To", "CC", "BCC", "Both To and CC"], answer: 3, category: "Networking" },
+      
+      // Database Concepts
+      { q: "What is a database?", options: ["Spreadsheet", "Organized data collection", "File folder", "Backup"], answer: 1, category: "Software" },
+      { q: "Which is database software?", options: ["Word", "Excel", "SQL Server", "PowerPoint"], answer: 2, category: "Software" },
+      { q: "What is SQL?", options: ["Spreadsheet", "Query language", "Operating system", "Protocol"], answer: 1, category: "Software" },
+      { q: "Which stores records?", options: ["Field", "Table", "Query", "Form"], answer: 1, category: "Software" },
+      { q: "What is primary key?", options: ["Password", "Unique identifier", "First column", "Main table"], answer: 1, category: "Software" },
+      { q: "Which connects tables?", options: ["Link", "Join", "Merge", "Union"], answer: 1, category: "Software" },
+      { q: "What is data integrity?", options: ["Backup", "Accuracy and consistency", "Encryption", "Access control"], answer: 1, category: "Software" },
+      { q: "Which retrieves data?", options: ["Query", "Form", "Report", "Table"], answer: 0, category: "Software" },
+      { q: "What is normalization?", options: ["Formatting", "Organizing efficiently", "Backing up", "Encrypting"], answer: 1, category: "Software" },
+      { q: "Which shows formatted data?", options: ["Table", "Query", "Report", "Form"], answer: 2, category: "Software" },
+      
+      // File Management
+      { q: "What is file extension?", options: ["File size", "File type indicator", "File name", "File location"], answer: 1, category: "Windows" },
+      { q: "Which shows hidden files?", options: ["File Explorer options", "Control Panel", "Settings", "Registry"], answer: 0, category: "Windows" },
+      { q: "What is file association?", options: ["Related files", "Default program", "File link", "Shared folder"], answer: 1, category: "Windows" },
+      { q: "Which compresses files?", options: ["ZIP", "EXE", "DLL", "SYS"], answer: 0, category: "Windows" },
+      { q: "What is file attribute?", options: ["Size", "Property like read-only", "Extension", "Location"], answer: 1, category: "Windows" },
+      { q: "Which command copies files?", options: ["copy", "move", "xcopy", "All of the above"], answer: 3, category: "Windows" },
+      { q: "What is file path?", options: ["File size", "File location", "File name", "File type"], answer: 1, category: "Windows" },
+      { q: "Which deletes files permanently?", options: ["Delete key", "Shift+Delete", "Recycle Bin", "Right-click delete"], answer: 1, category: "Windows" },
+      { q: "What is file versioning?", options: ["Naming convention", "Keeping multiple versions", "File size", "File format"], answer: 1, category: "Windows" },
+      { q: "Which searches for files?", options: ["File Explorer search", "Search indexer", "Everything search", "All of the above"], answer: 3, category: "Windows" },
+      
+      // BIOS/UEFI
+      { q: "What is UEFI?", options: ["Old BIOS", "Modern firmware", "Operating system", "Driver"], answer: 1, category: "Hardware" },
+      { q: "Which boots faster?", options: ["BIOS", "UEFI", "Same speed", "Depends on CPU"], answer: 1, category: "Hardware" },
+      { q: "What is boot order?", options: ["OS features", "Device priority", "File sequence", "User accounts"], answer: 1, category: "Hardware" },
+      { q: "Which enables virtualization?", options: ["BIOS/UEFI setting", "Windows setting", "Driver", "Application"], answer: 0, category: "Hardware" },
+      { q: "What is Secure Boot?", options: ["Password", "Boot verification", "Encryption", "Backup"], answer: 1, category: "Hardware" },
+      { q: "Which shows hardware info?", options: ["BIOS/UEFI", "Windows", "Both", "Neither"], answer: 2, category: "Hardware" },
+      { q: "What is TPM?", options: ["Memory type", "Security chip", "CPU feature", "Storage"], answer: 1, category: "Hardware" },
+      { q: "Which enables overclocking?", options: ["Windows", "BIOS/UEFI", "Driver", "Application"], answer: 1, category: "Hardware" },
+      { q: "What is boot password?", options: ["Windows password", "BIOS password", "Email password", "Admin password"], answer: 1, category: "Hardware" },
+      { q: "Which updates BIOS?", options: ["Windows Update", "Flash utility", "Driver update", "Automatic"], answer: 1, category: "Hardware" }
+    ];
 
-    try {
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${API_KEY}`
+    const labQuestions = [
+      // Command Line Labs
+      { q: "Lab: You need to check if www.google.com is reachable. What command would you use?", task: "Enter the command to test connectivity to www.google.com", answer: "ping www.google.com", category: "Command Line" },
+      { q: "Lab: Display the IP configuration of your Windows computer.", task: "Enter the command to show IP configuration", answer: "ipconfig", category: "Command Line" },
+      { q: "Lab: You need to trace the route packets take to www.microsoft.com.", task: "Enter the command to trace the route", answer: "tracert www.microsoft.com", category: "Command Line" },
+      { q: "Lab: Clear the DNS cache on a Windows computer.", task: "Enter the command to flush DNS", answer: "ipconfig /flushdns", category: "Command Line" },
+      { q: "Lab: Check the integrity of system files on Windows.", task: "Enter the command to scan and repair system files", answer: "sfc /scannow", category: "Command Line" },
+      { q: "Lab: Display all active network connections.", task: "Enter the command to show network connections", answer: "netstat", category: "Command Line" },
+      { q: "Lab: Open the Windows Registry Editor.", task: "Enter the command to open Registry Editor", answer: "regedit", category: "Command Line" },
+      { q: "Lab: Check disk for errors on drive C:.", task: "Enter the command to check disk C:", answer: "chkdsk c:", category: "Command Line" },
+      { q: "Lab: Display detailed IP configuration including MAC address.", task: "Enter the command for detailed IP info", answer: "ipconfig /all", category: "Command Line" },
+      { q: "Lab: Renew the DHCP-assigned IP address.", task: "Enter the command to renew IP address", answer: "ipconfig /renew", category: "Command Line" },
+      
+      // Windows Configuration Labs
+      { q: "Lab: Open Device Manager using Run dialog.", task: "Enter the command to open Device Manager", answer: "devmgmt.msc", category: "Windows Config" },
+      { q: "Lab: Open Windows Services management console.", task: "Enter the command to open Services", answer: "services.msc", category: "Windows Config" },
+      { q: "Lab: Access System Configuration utility.", task: "Enter the command to open System Configuration", answer: "msconfig", category: "Windows Config" },
+      { q: "Lab: Open Local Group Policy Editor.", task: "Enter the command to open Group Policy Editor", answer: "gpedit.msc", category: "Windows Config" },
+      { q: "Lab: Access Computer Management console.", task: "Enter the command to open Computer Management", answer: "compmgmt.msc", category: "Windows Config" },
+      { q: "Lab: Open Disk Management utility.", task: "Enter the command to open Disk Management", answer: "diskmgmt.msc", category: "Windows Config" },
+      { q: "Lab: Access System Properties directly.", task: "Enter the command to open System Properties", answer: "sysdm.cpl", category: "Windows Config" },
+      { q: "Lab: Open Windows Firewall settings.", task: "Enter the command to open Firewall settings", answer: "firewall.cpl", category: "Windows Config" },
+      { q: "Lab: Access Programs and Features.", task: "Enter the command to open Programs and Features", answer: "appwiz.cpl", category: "Windows Config" },
+      { q: "Lab: Open Task Scheduler.", task: "Enter the command to open Task Scheduler", answer: "taskschd.msc", category: "Windows Config" },
+      
+      // Networking Labs
+      { q: "Lab: Release the current IP address on Windows.", task: "Enter the command to release IP address", answer: "ipconfig /release", category: "Networking" },
+      { q: "Lab: Display the routing table.", task: "Enter the command to show routing table", answer: "route print", category: "Networking" },
+      { q: "Lab: Display all network adapters and their status.", task: "Enter the command using netsh to show interfaces", answer: "netsh interface show interface", category: "Networking" },
+      { q: "Lab: Lookup the IP address of www.example.com.", task: "Enter the command to resolve domain name", answer: "nslookup www.example.com", category: "Networking" },
+      { q: "Lab: Display ARP cache showing IP to MAC mappings.", task: "Enter the command to view ARP cache", answer: "arp -a", category: "Networking" },
+      { q: "Lab: Map a network drive to \\\\server\\share as drive Z:.", task: "Enter the command to map network drive", answer: "net use z: \\\\server\\share", category: "Networking" },
+      { q: "Lab: Test if port 80 is open on www.example.com.", task: "Enter the telnet command (format: telnet host port)", answer: "telnet www.example.com 80", category: "Networking" },
+      { q: "Lab: Display DNS client cache.", task: "Enter the command to display DNS cache", answer: "ipconfig /displaydns", category: "Networking" },
+      { q: "Lab: Show network statistics for TCP protocol.", task: "Enter the netstat command with protocol flag", answer: "netstat -p tcp", category: "Networking" },
+      { q: "Lab: Disconnect mapped network drive Z:.", task: "Enter the command to remove network drive", answer: "net use z: /delete", category: "Networking" },
+      
+      // File Management Labs
+      { q: "Lab: Copy file.txt from C:\\Temp to D:\\Backup.", task: "Enter the command to copy the file", answer: "copy c:\\temp\\file.txt d:\\backup", category: "File Management" },
+      { q: "Lab: Move file.txt from C:\\Temp to D:\\Archive.", task: "Enter the command to move the file", answer: "move c:\\temp\\file.txt d:\\archive", category: "File Management" },
+      { q: "Lab: Delete the file C:\\Temp\\old.txt.", task: "Enter the command to delete the file", answer: "del c:\\temp\\old.txt", category: "File Management" },
+      { q: "Lab: Create a new directory called Projects in C:\\Users.", task: "Enter the command to create directory", answer: "mkdir c:\\users\\projects", category: "File Management" },
+      { q: "Lab: Display directory contents including hidden files.", task: "Enter the dir command with appropriate flag", answer: "dir /a", category: "File Management" },
+      { q: "Lab: Remove empty directory C:\\Temp\\OldFolder.", task: "Enter the command to remove directory", answer: "rmdir c:\\temp\\oldfolder", category: "File Management" },
+      { q: "Lab: Display contents of file.txt to screen.", task: "Enter the command to display file contents", answer: "type file.txt", category: "File Management" },
+      { q: "Lab: Copy entire directory structure from C:\\Data to D:\\Backup.", task: "Enter the xcopy command with subdirectory flag", answer: "xcopy c:\\data d:\\backup /s", category: "File Management" },
+      { q: "Lab: Rename file old.txt to new.txt.", task: "Enter the command to rename the file", answer: "ren old.txt new.txt", category: "File Management" },
+      { q: "Lab: Display contents of current directory.", task: "Enter the command to list directory", answer: "dir", category: "File Management" },
+      
+      // User Management Labs
+      { q: "Lab: Create a new local user account named 'jsmith'.", task: "Enter the net user command to create user", answer: "net user jsmith /add", category: "User Management" },
+      { q: "Lab: Add user 'jsmith' to Administrators group.", task: "Enter the command to add user to group", answer: "net localgroup administrators jsmith /add", category: "User Management" },
+      { q: "Lab: Display all local user accounts.", task: "Enter the command to list all users", answer: "net user", category: "User Management" },
+      { q: "Lab: Delete user account 'tempuser'.", task: "Enter the command to delete user", answer: "net user tempuser /delete", category: "User Management" },
+      { q: "Lab: Display members of Administrators group.", task: "Enter the command to show group members", answer: "net localgroup administrators", category: "User Management" },
+      { q: "Lab: Change password for user 'jsmith'.", task: "Enter the net user command to change password (use * for prompt)", answer: "net user jsmith *", category: "User Management" },
+      { q: "Lab: Disable user account 'contractor'.", task: "Enter the command to disable account", answer: "net user contractor /active:no", category: "User Management" },
+      { q: "Lab: Display all local groups.", task: "Enter the command to list local groups", answer: "net localgroup", category: "User Management" },
+      { q: "Lab: Remove user 'jsmith' from Administrators group.", task: "Enter the command to remove from group", answer: "net localgroup administrators jsmith /delete", category: "User Management" },
+      { q: "Lab: Enable user account 'contractor'.", task: "Enter the command to enable account", answer: "net user contractor /active:yes", category: "User Management" },
+      
+      // System Information Labs
+      { q: "Lab: Display detailed system information.", task: "Enter the command to show system info", answer: "systeminfo", category: "System Info" },
+      { q: "Lab: Display Windows version information.", task: "Enter the command to show version", answer: "winver", category: "System Info" },
+      { q: "Lab: Show running processes and their CPU usage.", task: "Enter the command to list processes", answer: "tasklist", category: "System Info" },
+      { q: "Lab: Terminate process notepad.exe.", task: "Enter the command to kill process by name", answer: "taskkill /im notepad.exe", category: "System Info" },
+      { q: "Lab: Display environment variables.", task: "Enter the command to show environment variables", answer: "set", category: "System Info" },
+      { q: "Lab: Check if computer is 32-bit or 64-bit.", task: "Enter the systeminfo command with findstr to show system type", answer: "systeminfo | findstr /i type", category: "System Info" },
+      { q: "Lab: Display computer name and domain.", task: "Enter the command to show hostname", answer: "hostname", category: "System Info" },
+      { q: "Lab: Show current logged in user.", task: "Enter the command to display current user", answer: "whoami", category: "System Info" },
+      { q: "Lab: Display Windows license information.", task: "Enter the slmgr command to show license", answer: "slmgr /dli", category: "System Info" },
+      { q: "Lab: Show DirectX diagnostic information.", task: "Enter the command to open DirectX diagnostic", answer: "dxdiag", category: "System Info" },
+      
+      // Troubleshooting Labs
+      { q: "Lab: Repair Windows boot files.", task: "Enter the bootrec command to fix MBR", answer: "bootrec /fixmbr", category: "Troubleshooting" },
+      { q: "Lab: Rebuild BCD (Boot Configuration Data).", task: "Enter the bootrec command to rebuild BCD", answer: "bootrec /rebuildbcd", category: "Troubleshooting" },
+      { q: "Lab: Repair Windows image using DISM.", task: "Enter the DISM command to restore health", answer: "dism /online /cleanup-image /restorehealth", category: "Troubleshooting" },
+      { q: "Lab: Check if a service named 'Spooler' is running.", task: "Enter the sc command to query service", answer: "sc query spooler", category: "Troubleshooting" },
+      { q: "Lab: Start the Print Spooler service.", task: "Enter the net command to start service", answer: "net start spooler", category: "Troubleshooting" },
+      { q: "Lab: Stop the Print Spooler service.", task: "Enter the net command to stop service", answer: "net stop spooler", category: "Troubleshooting" },
+      { q: "Lab: Clear all event logs.", task: "Enter the wevtutil command to clear all logs", answer: "wevtutil cl system", category: "Troubleshooting" },
+      { q: "Lab: Check disk C: for errors and repair automatically.", task: "Enter the chkdsk command with repair flags", answer: "chkdsk c: /f", category: "Troubleshooting" },
+      { q: "Lab: Scan disk C: for bad sectors.", task: "Enter the chkdsk command with surface scan flag", answer: "chkdsk c: /r", category: "Troubleshooting" },
+      { q: "Lab: Open Event Viewer.", task: "Enter the command to launch Event Viewer", answer: "eventvwr", category: "Troubleshooting" },
+      
+      // Security Labs
+      { q: "Lab: Display Windows Firewall status.", task: "Enter the netsh command to show firewall state", answer: "netsh advfirewall show allprofiles", category: "Security" },
+      { q: "Lab: Turn on Windows Firewall for all profiles.", task: "Enter the netsh command to enable firewall", answer: "netsh advfirewall set allprofiles state on", category: "Security" },
+      { q: "Lab: Display local security policy.", task: "Enter the command to open Local Security Policy", answer: "secpol.msc", category: "Security" },
+      { q: "Lab: Lock the workstation immediately.", task: "Enter the Windows key combination or rundll32 command", answer: "rundll32 user32.dll,LockWorkStation", category: "Security" },
+      { q: "Lab: Check BitLocker status on drive C:.", task: "Enter the manage-bde command to show status", answer: "manage-bde -status c:", category: "Security" },
+      { q: "Lab: Display password policy requirements.", task: "Enter the net command to show password policy", answer: "net accounts", category: "Security" },
+      { q: "Lab: Display file permissions for C:\\Data.", task: "Enter the icacls command to show permissions", answer: "icacls c:\\data", category: "Security" },
+      { q: "Lab: Take ownership of file important.txt.", task: "Enter the takeown command", answer: "takeown /f important.txt", category: "Security" },
+      { q: "Lab: Display current user's security groups.", task: "Enter the whoami command with group flag", answer: "whoami /groups", category: "Security" },
+      { q: "Lab: Show active network connections with process IDs.", task: "Enter the netstat command with appropriate flags", answer: "netstat -ano", category: "Security" },
+      
+      // PowerShell Labs
+      { q: "Lab: Get list of running services in PowerShell.", task: "Enter the PowerShell cmdlet to list services", answer: "get-service", category: "PowerShell" },
+      { q: "Lab: Display all processes in PowerShell.", task: "Enter the PowerShell cmdlet to show processes", answer: "get-process", category: "PowerShell" },
+      { q: "Lab: Get PowerShell version information.", task: "Enter the command to show PS version", answer: "$psversiontable", category: "PowerShell" },
+      { q: "Lab: List all files in current directory using PowerShell.", task: "Enter the PowerShell cmdlet to list items", answer: "get-childitem", category: "PowerShell" },
+      { q: "Lab: Display network adapter configuration in PowerShell.", task: "Enter the PowerShell cmdlet for network adapters", answer: "get-netadapter", category: "PowerShell" },
+      { q: "Lab: Get help for a PowerShell cmdlet.", task: "Enter the command to get help (use Get-Service as example)", answer: "get-help get-service", category: "PowerShell" },
+      { q: "Lab: Display computer information using PowerShell.", task: "Enter the PowerShell cmdlet for computer info", answer: "get-computerinfo", category: "PowerShell" },
+      { q: "Lab: Stop a process by name in PowerShell.", task: "Enter the PowerShell cmdlet to stop notepad", answer: "stop-process -name notepad", category: "PowerShell" },
+      { q: "Lab: Get list of installed Windows updates.", task: "Enter the PowerShell cmdlet to show hotfixes", answer: "get-hotfix", category: "PowerShell" },
+      { q: "Lab: Display disk information in PowerShell.", task: "Enter the PowerShell cmdlet to show disk info", answer: "get-disk", category: "PowerShell" },
+      
+      // Linux Basic Commands Labs
+      { q: "Lab: List all files including hidden in Linux.", task: "Enter the ls command with appropriate flag", answer: "ls -a", category: "Linux" },
+      { q: "Lab: Display current directory in Linux.", task: "Enter the command to print working directory", answer: "pwd", category: "Linux" },
+      { q: "Lab: Change to /home/user directory.", task: "Enter the command to change directory", answer: "cd /home/user", category: "Linux" },
+      { q: "Lab: Create a new directory called 'projects'.", task: "Enter the Linux command to make directory", answer: "mkdir projects", category: "Linux" },
+      { q: "Lab: Remove file named 'test.txt' in Linux.", task: "Enter the command to remove file", answer: "rm test.txt", category: "Linux" },
+      { q: "Lab: Copy file.txt to backup.txt.", task: "Enter the Linux copy command", answer: "cp file.txt backup.txt", category: "Linux" },
+      { q: "Lab: Display contents of file.txt.", task: "Enter the Linux command to view file", answer: "cat file.txt", category: "Linux" },
+      { q: "Lab: Change file permissions to 755.", task: "Enter the chmod command", answer: "chmod 755 file", category: "Linux" },
+      { q: "Lab: Display running processes in Linux.", task: "Enter the command to show processes", answer: "ps", category: "Linux" },
+      { q: "Lab: Become root user in Linux.", task: "Enter the command to switch to superuser", answer: "sudo su", category: "Linux" }
+    ];
+
+    const scenarioQuestions = [
+      // Desktop Support Scenarios
+      { q: "Scenario: A user calls saying their computer won't turn on. The power LED is off. What is your FIRST troubleshooting step?", options: ["Replace motherboard", "Check power cable connection", "Replace RAM", "Reinstall Windows"], answer: 1, category: "Troubleshooting" },
+      { q: "Scenario: An employee reports their laptop is running very slow. Task Manager shows 100% disk usage. What is the MOST likely cause?", options: ["Bad CPU", "Failing hard drive", "Too much RAM", "Power supply issue"], answer: 1, category: "Troubleshooting" },
+      { q: "Scenario: A user cannot print to the network printer. Other users can print fine. What should you check FIRST?", options: ["Replace printer", "Check user's print queue", "Restart print server", "Replace network cable"], answer: 1, category: "Troubleshooting" },
+      { q: "Scenario: After a Windows update, a user's application won't launch. What is the BEST immediate solution?", options: ["Reinstall Windows", "Uninstall the update", "Replace hard drive", "Buy new software"], answer: 1, category: "Troubleshooting" },
+      { q: "Scenario: A user accidentally deleted important files. They were not backed up. What recovery option should you try FIRST?", options: ["Accept data loss", "Check Recycle Bin", "Format drive", "Buy recovery software"], answer: 1, category: "Troubleshooting" },
+      
+      // Network Scenarios
+      { q: "Scenario: A user can't access the internet but can access local network resources. What is MOST likely the issue?", options: ["Bad NIC", "Bad switch", "Gateway/router problem", "Bad cable"], answer: 2, category: "Networking" },
+      { q: "Scenario: All users in one office lost internet connectivity. What should you check FIRST?", options: ["Each computer", "Network switch", "Each cable", "Each NIC"], answer: 1, category: "Networking" },
+      { q: "Scenario: A user's laptop connects to WiFi but shows 'No Internet Access'. What should you verify FIRST?", options: ["Laptop NIC", "WiFi password", "DHCP/DNS settings", "Replace router"], answer: 2, category: "Networking" },
+      { q: "Scenario: Users complain the network is slow only during business hours. What is MOST likely the cause?", options: ["Bad cables", "Bandwidth saturation", "Bad switch", "DNS issues"], answer: 1, category: "Networking" },
+      { q: "Scenario: A user moved to a different office and can't connect to WiFi. They could connect in their old location. What is MOST likely?", options: ["Laptop broken", "WiFi adapter failed", "Out of range/signal", "Wrong password"], answer: 2, category: "Networking" },
+      
+      // Security Scenarios
+      { q: "Scenario: A user received an email claiming to be from IT asking for their password. What should they do?", options: ["Reply with password", "Delete and report it", "Forward to colleagues", "Call the sender"], answer: 1, category: "Security" },
+      { q: "Scenario: A user's files are encrypted and they see a ransom note. What type of attack is this?", options: ["Phishing", "Ransomware", "Spyware", "Trojan"], answer: 1, category: "Security" },
+      { q: "Scenario: An employee is leaving the company today. What should IT do IMMEDIATELY?", options: ["Nothing", "Disable account", "Wait one week", "Give more access"], answer: 1, category: "Security" },
+      { q: "Scenario: You find a USB drive in the parking lot. What should you do?", options: ["Plug it in to see contents", "Turn it in to security", "Keep it", "Give to random employee"], answer: 1, category: "Security" },
+      { q: "Scenario: A user reports their antivirus detected and quarantined a virus. What should you do NEXT?", options: ["Restore the file", "Run full system scan", "Ignore it", "Reinstall Windows"], answer: 1, category: "Security" },
+      
+      // Mobile Device Scenarios
+      { q: "Scenario: A company iPhone was stolen. What should you do FIRST to protect company data?", options: ["Buy new phone", "Remote wipe device", "Call police only", "Change WiFi password"], answer: 1, category: "Mobile" },
+      { q: "Scenario: A user's smartphone battery drains very quickly. What should you check FIRST?", options: ["Buy new phone", "Check running apps", "Replace battery", "Factory reset"], answer: 1, category: "Mobile" },
+      { q: "Scenario: An employee can't receive work emails on their phone. Personal email works fine. What is MOST likely the issue?", options: ["Phone broken", "Email account settings", "Carrier problem", "Exchange server down"], answer: 1, category: "Mobile" },
+      { q: "Scenario: A user dropped their phone in water. What should they do FIRST?", options: ["Turn it on to test", "Power off and dry it", "Charge it", "Use it immediately"], answer: 1, category: "Mobile" },
+      { q: "Scenario: An iPad won't connect to the corporate WiFi. Personal devices connect fine. What is MOST likely needed?", options: ["New iPad", "Configure certificate/profile", "Reset router", "New WiFi password"], answer: 1, category: "Mobile" },
+      
+      // Cloud Scenarios
+      { q: "Scenario: A user can't access files in OneDrive. They have internet access. What should you check FIRST?", options: ["Internet speed", "OneDrive sync status", "Hard drive", "RAM"], answer: 1, category: "Cloud" },
+      { q: "Scenario: Your company wants to host email in the cloud. Which service type is this?", options: ["IaaS", "SaaS", "PaaS", "DaaS"], answer: 1, category: "Cloud" },
+      { q: "Scenario: A user accidentally deleted files from cloud storage. What feature should you use to recover them?", options: ["Backup", "Version history", "New account", "Cloud is permanent"], answer: 1, category: "Cloud" },
+      { q: "Scenario: Multiple users need to collaborate on a document in real-time. What cloud feature enables this?", options: ["Email", "Shared editing", "FTP", "VPN"], answer: 1, category: "Cloud" },
+      { q: "Scenario: A remote worker needs to access company files securely. What should you implement?", options: ["Email files", "VPN", "Public sharing", "USB drive"], answer: 1, category: "Cloud" },
+      
+      // Windows Administration Scenarios
+      { q: "Scenario: A user needs to run a program that requires admin rights. They are a standard user. What is the BEST solution?", options: ["Make them admin", "Use Run as administrator", "Reinstall program", "Can't be done"], answer: 1, category: "Windows" },
+      { q: "Scenario: A computer is stuck in a boot loop after driver installation. How do you fix this?", options: ["Reinstall Windows", "Boot to Safe Mode", "Replace hard drive", "Buy new computer"], answer: 1, category: "Windows" },
+      { q: "Scenario: A user needs to access their computer from home. What Windows feature should you enable?", options: ["File sharing", "Remote Desktop", "HomeGroup", "VPN only"], answer: 1, category: "Windows" },
+      { q: "Scenario: An application crashes immediately on launch. What Windows tool can help diagnose the issue?", options: ["Paint", "Event Viewer", "Calculator", "Notepad"], answer: 1, category: "Windows" },
+      { q: "Scenario: A user's Windows profile is corrupted. What is the FASTEST solution?", options: ["Reinstall Windows", "Create new profile", "Repair install", "Replace hard drive"], answer: 1, category: "Windows" },
+      
+      // Professional Communication Scenarios
+      { q: "Scenario: A user is yelling at you about their computer problem. How should you respond?", options: ["Yell back", "Stay calm and listen", "Hang up", "Blame them"], answer: 1, category: "Professionalism" },
+      { q: "Scenario: You don't know the answer to a technical question. What should you do?", options: ["Make something up", "Admit it and research", "Ignore the question", "Blame someone else"], answer: 1, category: "Professionalism" },
+      { q: "Scenario: A user asks you to help with a personal computer issue. What should you do?", options: ["Do it for free", "Refer to company policy", "Refuse rudely", "Always say yes"], answer: 1, category: "Professionalism" },
+      { q: "Scenario: You see confidential data on a user's screen. What should you do?", options: ["Take pictures", "Tell everyone", "Ignore and respect privacy", "Post online"], answer: 2, category: "Professionalism" },
+      { q: "Scenario: A user is confused by technical terms. How should you communicate?", options: ["Use more jargon", "Simplify your language", "Speak louder", "Give up"], answer: 1, category: "Professionalism" },
+      
+      // Printer Scenarios
+      { q: "Scenario: A laser printer is producing faded prints. What is MOST likely the cause?", options: ["Paper jam", "Low/empty toner", "Network issue", "Bad cable"], answer: 1, category: "Printers" },
+      { q: "Scenario: Print jobs are stuck in the queue and won't print. What should you restart?", options: ["Computer", "Print Spooler service", "Network", "Printer power only"], answer: 1, category: "Printers" },
+      { q: "Scenario: A printer displays 'PC Load Letter'. What does this mean?", options: ["Printer broken", "Load letter-size paper", "Network error", "Replace toner"], answer: 1, category: "Printers" },
+      { q: "Scenario: Prints have black streaks. What is MOST likely the cause?", options: ["Dirty drum/fuser", "Low toner", "Bad network", "Wrong driver"], answer: 0, category: "Printers" },
+      { q: "Scenario: You need to share a printer with the entire office. What type of printer should you configure?", options: ["Local only", "Network printer", "USB only", "Bluetooth"], answer: 1, category: "Printers" },
+      
+      // Remote Work Scenarios
+      { q: "Scenario: A remote employee can't connect to the company VPN. What should you check FIRST?", options: ["Their internet connection", "Replace computer", "Restart server", "Fire them"], answer: 0, category: "Remote Access" },
+      { q: "Scenario: A user needs to securely transfer files to a coworker. What should they use?", options: ["Personal email", "Company approved method", "USB drive by mail", "Social media"], answer: 1, category: "Security" },
+      { q: "Scenario: Remote desktop connection is very slow. What network issue is MOST likely?", options: ["No issue", "Low bandwidth", "Too much bandwidth", "Wrong password"], answer: 1, category: "Remote Access" },
+      { q: "Scenario: A home worker needs to access company resources securely. What must be configured?", options: ["Nothing", "VPN connection", "Public WiFi", "File sharing"], answer: 1, category: "Remote Access" },
+      { q: "Scenario: You're providing remote support to a non-technical user. What should you do FIRST?", options: ["Use complex terms", "Explain clearly", "Get frustrated", "Hang up"], answer: 1, category: "Professionalism" },
+      
+      // Backup and Recovery Scenarios
+      { q: "Scenario: A server hard drive failed. What allows you to restore data?", options: ["Luck", "Valid backup", "New hard drive alone", "Restart"], answer: 1, category: "Troubleshooting" },
+      { q: "Scenario: You need to back up only files that changed today. What backup type?", options: ["Full", "Incremental", "Differential", "Copy"], answer: 1, category: "Security" },
+      { q: "Scenario: A user needs to restore their computer to yesterday. What Windows feature helps?", options: ["Backup", "System Restore", "Format", "Updates"], answer: 1, category: "Windows" },
+      { q: "Scenario: Critical server data must be backed up every hour. What backup strategy is BEST?", options: ["Manual daily", "Automated hourly", "Weekly only", "Never backup"], answer: 1, category: "Security" },
+      { q: "Scenario: Where should backup copies be stored for best disaster recovery?", options: ["Same building", "Offsite/cloud", "Same server", "No copies needed"], answer: 1, category: "Security" },
+      
+      // Account Management Scenarios
+      { q: "Scenario: A new employee starts Monday. When should their account be created?", options: ["After they arrive", "Before start date", "One month later", "Never"], answer: 1, category: "Security" },
+      { q: "Scenario: A user forgot their password. What is the proper procedure?", options: ["Tell them your password", "Reset via proper channel", "Give them admin", "Refuse to help"], answer: 1, category: "Security" },
+      { q: "Scenario: An intern needs temporary access for 3 months. What should you configure?", options: ["Permanent account", "Account expiration date", "Admin rights", "No expiration"], answer: 1, category: "Security" },
+      { q: "Scenario: Multiple failed login attempts occurred on an account. What security feature should activate?", options: ["Nothing", "Account lockout", "Delete account", "Grant more access"], answer: 1, category: "Security" },
+      { q: "Scenario: A contractor needs access to only one folder. What principle should you follow?", options: ["Full access", "Least privilege", "No access", "Admin access"], answer: 1, category: "Security" },
+      
+      // Performance Issues Scenarios
+      { q: "Scenario: A computer takes 10 minutes to boot. What should you check FIRST?", options: ["CPU", "Startup programs", "Monitor", "Keyboard"], answer: 1, category: "Troubleshooting" },
+      { q: "Scenario: A computer frequently freezes. Task Manager shows 98% memory usage. What is the solution?", options: ["More RAM or close programs", "New CPU", "New monitor", "Reinstall Windows"], answer: 0, category: "Troubleshooting" },
+      { q: "Scenario: Applications take forever to load from an HDD. What upgrade would help MOST?", options: ["More RAM", "Upgrade to SSD", "New CPU", "New monitor"], answer: 1, category: "Troubleshooting" },
+      { q: "Scenario: CPU temperature is 95°C and computer shuts down randomly. What is the issue?", options: ["Normal operation", "Overheating", "Virus", "Too cold"], answer: 1, category: "Troubleshooting" },
+      { q: "Scenario: Browser is very slow and showing ads everywhere. What is MOST likely?", options: ["Normal", "Adware/malware", "Fast internet", "New browser needed"], answer: 1, category: "Security" },
+      
+      // Software Installation Scenarios
+      { q: "Scenario: A program won't install saying 'insufficient privileges'. What is needed?", options: ["Better computer", "Administrator rights", "More RAM", "Nothing"], answer: 1, category: "Windows" },
+      { q: "Scenario: After installing software, the computer won't boot. What should you do?", options: ["Throw it away", "Boot Safe Mode, uninstall", "Buy new computer", "Wait"], answer: 1, category: "Troubleshooting" },
+      { q: "Scenario: An application requires .NET Framework 4.8. Where do you get this?", options: ["Nowhere", "Microsoft website", "Any website", "Not needed"], answer: 1, category: "Windows" },
+      { q: "Scenario: A legacy program won't run on Windows 10. What feature can help?", options: ["Can't run it", "Compatibility Mode", "Buy new program", "Downgrade Windows"], answer: 1, category: "Windows" },
+      { q: "Scenario: Users need the same software on 50 computers. What is the MOST efficient method?", options: ["Install manually on each", "Deployment/imaging", "Don't install", "Users install themselves"], answer: 1, category: "Windows" },
+      
+      // Email Scenarios
+      { q: "Scenario: A user can send email but not receive. What should you check?", options: ["Sending settings", "Incoming server settings", "Internet", "Keyboard"], answer: 1, category: "Networking" },
+      { q: "Scenario: Company email must be accessed from phone, laptop, and desktop. What protocol is BEST?", options: ["POP3", "IMAP", "FTP", "SMTP"], answer: 1, category: "Networking" },
+      { q: "Scenario: A user received a suspicious email with an attachment. What should they do?", options: ["Open it", "Don't open, report it", "Forward it", "Reply"], answer: 1, category: "Security" },
+      { q: "Scenario: Emails are going to users' spam folders. What server setting might help?", options: ["Nothing", "SPF records", "More RAM", "New keyboard"], answer: 1, category: "Networking" },
+      { q: "Scenario: A user wants email encrypted in transit. What protocol should be used?", options: ["HTTP", "SSL/TLS", "FTP", "Telnet"], answer: 1, category: "Security" },
+      
+      // Update and Patch Scenarios
+      { q: "Scenario: Windows Update failed and rolled back. What should you do?", options: ["Ignore it", "Check logs, try again", "Reinstall Windows", "Buy new computer"], answer: 1, category: "Windows" },
+      { q: "Scenario: A critical security patch is released. When should you apply it?", options: ["Never", "As soon as possible", "In 6 months", "Ignore"], answer: 1, category: "Security" },
+      { q: "Scenario: After updates, a production server won't boot. What process was skipped?", options: ["Nothing", "Testing in non-production", "Reading patch notes", "Backing up"], answer: 1, category: "Troubleshooting" },
+      { q: "Scenario: Third-party software needs updates. Where should you get them?", options: ["Any website", "Vendor's official site", "Email links", "Random sites"], answer: 1, category: "Security" },
+      { q: "Scenario: Users complain updates restart their computers. What should you configure?", options: ["Disable updates", "Active hours", "Nothing", "Restart randomly"], answer: 1, category: "Windows" },
+      
+      // Hardware Failure Scenarios
+      { q: "Scenario: A computer displays 'No boot device found'. What hardware is MOST likely failing?", options: ["Monitor", "Hard drive", "Keyboard", "Mouse"], answer: 1, category: "Troubleshooting" },
+      { q: "Scenario: The computer beeps continuously and doesn't boot. What is likely failing?", options: ["HDD", "RAM", "Mouse", "Speaker"], answer: 1, category: "Troubleshooting" },
+      { q: "Scenario: Half the screen is displaying correctly, half is distorted. What is likely failing?", options: ["RAM", "Monitor/GPU", "HDD", "PSU"], answer: 1, category: "Troubleshooting" },
+      { q: "Scenario: A desktop computer randomly shuts down under heavy load. What should you check?", options: ["Monitor", "Power supply/cooling", "Keyboard", "Mouse"], answer: 1, category: "Troubleshooting" },
+      { q: "Scenario: USB devices aren't recognized on any port. What might be the issue?", options: ["All USB devices bad", "USB controller/drivers", "Monitor", "HDD"], answer: 1, category: "Troubleshooting" },
+      
+      // Documentation Scenarios
+      { q: "Scenario: You fixed a complex issue. What should you do AFTER the fix?", options: ["Nothing", "Document the solution", "Forget about it", "Tell no one"], answer: 1, category: "Documentation" },
+      { q: "Scenario: A user reports an ongoing problem. What should you create?", options: ["Nothing", "Ticket/incident report", "Bill", "Complaint"], answer: 1, category: "Documentation" },
+      { q: "Scenario: Multiple users report the same issue. What should you check?", options: ["Nothing", "Known issues/knowledge base", "Each individually", "Ignore"], answer: 1, category: "Documentation" },
+      { q: "Scenario: You're about to make a major system change. What should you create?", options: ["Nothing", "Change request/plan", "Problem", "More work"], answer: 1, category: "Documentation" },
+      { q: "Scenario: A server configuration needs to be replicated. What documentation is needed?", options: ["Nothing", "Detailed configuration documentation", "Memory", "Guess"], answer: 1, category: "Documentation" },
+      
+      // Virtualization Scenarios
+      { q: "Scenario: A company wants to run multiple OS on one physical server. What technology?", options: ["Multiple monitors", "Virtualization", "More RAM only", "Impossible"], answer: 1, category: "Cloud" },
+      { q: "Scenario: A VM won't start due to insufficient memory. What should you adjust?", options: ["Buy new server", "Allocate more RAM to VM", "Restart", "Delete VM"], answer: 1, category: "Cloud" },
+      { q: "Scenario: You need to test software without risking the main system. What should you use?", options: ["Production system", "Virtual machine", "Nothing", "User's computer"], answer: 1, category: "Cloud" },
+      { q: "Scenario: A physical server failed but VMs must stay online. What feature helps?", options: ["Nothing", "VM migration/HA", "Restart", "Give up"], answer: 1, category: "Cloud" },
+      { q: "Scenario: Multiple VMs on one host are slow. What is likely the bottleneck?", options: ["Not enough physical resources", "Too fast", "Normal", "Magic"], answer: 0, category: "Cloud" },
+      
+      // BYOD Scenarios
+      { q: "Scenario: Employees want to use personal phones for work email. What policy should exist?", options: ["Allow anything", "BYOD policy with MDM", "Ban all devices", "No policy"], answer: 1, category: "Mobile" },
+      { q: "Scenario: A personal device accessing company data was lost. What feature helps?", options: ["Nothing", "Remote wipe capability", "Buy new phone", "Hope"], answer: 1, category: "Security" },
+      { q: "Scenario: An employee's personal laptop has malware and connects to company network. What is the risk?", options: ["None", "Network infection", "Good thing", "Normal"], answer: 1, category: "Security" },
+      { q: "Scenario: Personal devices need WiFi but not access to company servers. What should you configure?", options: ["Full access", "Guest network", "No WiFi", "Admin access"], answer: 1, category: "Networking" },
+      { q: "Scenario: A user wants to sync personal and work email on their phone. What should be configured?", options: ["Nothing", "Separate profiles/accounts", "Mix everything", "Deny"], answer: 1, category: "Mobile" },
+      
+      // Licensing Scenarios
+      { q: "Scenario: A company needs Office on 100 computers. What licensing should they get?", options: ["One license", "Volume/enterprise licensing", "100 pirated copies", "Free versions"], answer: 1, category: "Software" },
+      { q: "Scenario: Software audit reveals unlicensed software. What should you do?", options: ["Ignore", "Purchase licenses or remove", "Hide it", "Blame users"], answer: 1, category: "Software" },
+      { q: "Scenario: A user wants to install software from home on their work computer. What should you check?", options: ["Nothing", "Licensing terms", "Just install", "Deny always"], answer: 1, category: "Software" },
+      { q: "Scenario: A departing employee has licensed software on their computer. What happens to the license?", options: ["Lost forever", "Can be reassigned", "Automatic", "Buy new"], answer: 1, category: "Software" },
+      { q: "Scenario: Cloud subscription expired. What happens to the data?", options: ["Deleted instantly", "Limited access/grace period", "Free forever", "Nothing"], answer: 1, category: "Cloud" }
+    ];
+
+    let currentQuiz = [];
+    let currentIndex = 0;
+    let score = 0;
+    let userAnswers = [];
+    let quizStarted = false;
+    let currentAnswer = null;
+
+    const dataHandler = {
+      onDataChanged(data) {
+        // Data is stored, we can display history if needed in future
+      }
+    };
+
+    async function onConfigChange(config) {
+      const baseSize = config.font_size || defaultConfig.font_size;
+      const customFont = config.font_family || defaultConfig.font_family;
+      const fontStack = `${customFont}, 'Roboto Mono', monospace`;
+      
+      document.documentElement.style.setProperty('--base-font-size', `${baseSize}px`);
+      document.body.style.fontFamily = fontStack;
+      document.body.style.backgroundColor = config.background_color || defaultConfig.background_color;
+      document.body.style.color = config.text_color || defaultConfig.text_color;
+      
+      const appDiv = document.getElementById('app');
+      if (appDiv) {
+        appDiv.style.backgroundColor = config.background_color || defaultConfig.background_color;
+      }
+      
+      const title = document.querySelector('h1');
+      if (title) {
+        title.textContent = config.main_title || defaultConfig.main_title;
+        title.style.fontSize = `${baseSize * 2}px`;
+        title.style.color = config.text_color || defaultConfig.text_color;
+      }
+      
+      const subtitle = document.querySelector('.subtitle');
+      if (subtitle) {
+        subtitle.textContent = config.subtitle || defaultConfig.subtitle;
+        subtitle.style.fontSize = `${baseSize * 1.125}px`;
+        subtitle.style.color = config.text_color || defaultConfig.text_color;
+      }
+      
+      const cards = document.querySelectorAll('.surface-card');
+      cards.forEach(card => {
+        card.style.backgroundColor = config.surface_color || defaultConfig.surface_color;
+        card.style.borderColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      });
+      
+      const buttons = document.querySelectorAll('.primary-btn');
+      buttons.forEach(btn => {
+        btn.style.backgroundColor = config.primary_action_color || defaultConfig.primary_action_color;
+        btn.style.fontSize = `${baseSize}px`;
+      });
+      
+      const secondaryBtns = document.querySelectorAll('.secondary-btn');
+      secondaryBtns.forEach(btn => {
+        btn.style.backgroundColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+        btn.style.fontSize = `${baseSize}px`;
+      });
+      
+      const labels = document.querySelectorAll('label');
+      labels.forEach(label => {
+        label.style.fontSize = `${baseSize * 0.875}px`;
+        label.style.color = config.text_color || defaultConfig.text_color;
+      });
+      
+      const inputs = document.querySelectorAll('input[type="number"]');
+      inputs.forEach(input => {
+        input.style.borderColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+        input.style.fontSize = `${baseSize}px`;
+      });
+      
+      const questionText = document.querySelector('.question-text');
+      if (questionText) {
+        questionText.style.fontSize = `${baseSize * 1.25}px`;
+        questionText.style.color = config.text_color || defaultConfig.text_color;
+      }
+      
+      const optionCards = document.querySelectorAll('.option-card');
+      optionCards.forEach(card => {
+        card.style.backgroundColor = config.surface_color || defaultConfig.surface_color;
+        card.style.borderColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+        card.style.fontSize = `${baseSize}px`;
+      });
+    }
+
+    async function init() {
+      const dataResult = await window.dataSdk.init(dataHandler);
+      if (!dataResult.isOk) {
+        console.error("Failed to initialize data SDK");
+      }
+      
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange,
+          mapToCapabilities: (config) => ({
+            recolorables: [
+              {
+                get: () => config.background_color || defaultConfig.background_color,
+                set: (value) => {
+                  config.background_color = value;
+                  window.elementSdk.setConfig({ background_color: value });
+                }
+              },
+              {
+                get: () => config.surface_color || defaultConfig.surface_color,
+                set: (value) => {
+                  config.surface_color = value;
+                  window.elementSdk.setConfig({ surface_color: value });
+                }
+              },
+              {
+                get: () => config.text_color || defaultConfig.text_color,
+                set: (value) => {
+                  config.text_color = value;
+                  window.elementSdk.setConfig({ text_color: value });
+                }
+              },
+              {
+                get: () => config.primary_action_color || defaultConfig.primary_action_color,
+                set: (value) => {
+                  config.primary_action_color = value;
+                  window.elementSdk.setConfig({ primary_action_color: value });
+                }
+              },
+              {
+                get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+                set: (value) => {
+                  config.secondary_action_color = value;
+                  window.elementSdk.setConfig({ secondary_action_color: value });
+                }
+              }
+            ],
+            borderables: [],
+            fontEditable: {
+              get: () => config.font_family || defaultConfig.font_family,
+              set: (value) => {
+                config.font_family = value;
+                window.elementSdk.setConfig({ font_family: value });
+              }
             },
-            body: JSON.stringify({
-                model: "gpt-4o-mini",
-                messages: [
-                    { role: "system", content: "You are a helpful, friendly, and concise AI assistant." },
-                    { role: "user", content: userText }
-                ],
-                temperature: 0.7
-            })
+            fontSizeable: {
+              get: () => config.font_size || defaultConfig.font_size,
+              set: (value) => {
+                config.font_size = value;
+                window.elementSdk.setConfig({ font_size: value });
+              }
+            }
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ["main_title", config.main_title || defaultConfig.main_title],
+            ["subtitle", config.subtitle || defaultConfig.subtitle],
+            ["start_button", config.start_button || defaultConfig.start_button],
+            ["submit_button", config.submit_button || defaultConfig.submit_button],
+            ["next_button", config.next_button || defaultConfig.next_button]
+          ])
         });
+      }
+      
+      renderSetupScreen();
+    }
 
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error?.message || "API request failed");
+    function renderSetupScreen() {
+      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        <div class="quiz-container fade-in" style="min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px;">
+          <div class="surface-card" style="max-width: 600px; width: 100%; padding: 48px; border-radius: 16px; border: 2px solid; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);">
+            <h1 style="font-weight: 700; margin-bottom: 16px; text-align: center;">${config.main_title || defaultConfig.main_title}</h1>
+            <p class="subtitle" style="text-align: center; margin-bottom: 32px; opacity: 0.8;">${config.subtitle || defaultConfig.subtitle}</p>
+            
+            <div style="margin-bottom: 24px;">
+              <label style="display: block; font-weight: 600; margin-bottom: 8px;">📝 Multiple Choice Questions</label>
+              <input type="number" id="mcCount" value="20" min="0" max="300" style="width: 100%; padding: 12px; border: 2px solid; border-radius: 8px; font-size: 16px; background: rgba(255,255,255,0.05);">
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+              <label style="display: block; font-weight: 600; margin-bottom: 8px;">🔬 Lab Questions</label>
+              <input type="number" id="labCount" value="5" min="0" max="100" style="width: 100%; padding: 12px; border: 2px solid; border-radius: 8px; font-size: 16px; background: rgba(255,255,255,0.05);">
+            </div>
+
+            <div style="margin-bottom: 32px;">
+              <label style="display: block; font-weight: 600; margin-bottom: 8px;">💼 Scenario Questions</label>
+              <input type="number" id="scenarioCount" value="5" min="0" max="100" style="width: 100%; padding: 12px; border: 2px solid; border-radius: 8px; font-size: 16px; background: rgba(255,255,255,0.05);">
+            </div>
+            
+            <button class="primary-btn" onclick="startQuiz()" style="width: 100%; padding: 16px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: white;">
+              ${config.start_button || defaultConfig.start_button}
+            </button>
+          </div>
+        </div>
+      `;
+      
+      onConfigChange(config);
+    }
+
+    window.startQuiz = function() {
+      const mcCount = parseInt(document.getElementById('mcCount').value);
+      const labCount = parseInt(document.getElementById('labCount').value);
+      const scenarioCount = parseInt(document.getElementById('scenarioCount').value);
+      
+      if (mcCount < 0 || mcCount > 300) {
+        showInlineMessage("Please enter between 0 and 300 multiple choice questions.");
+        return;
+      }
+      
+      if (labCount < 0 || labCount > 100) {
+        showInlineMessage("Please enter between 0 and 100 lab questions.");
+        return;
+      }
+
+      if (scenarioCount < 0 || scenarioCount > 100) {
+        showInlineMessage("Please enter between 0 and 100 scenario questions.");
+        return;
+      }
+
+      if (mcCount === 0 && labCount === 0 && scenarioCount === 0) {
+        showInlineMessage("Please select at least one question type.");
+        return;
+      }
+      
+      const shuffledMC = [...mcQuestions].sort(() => Math.random() - 0.5).slice(0, mcCount);
+      const shuffledLabs = [...labQuestions].sort(() => Math.random() - 0.5).slice(0, labCount);
+      const shuffledScenarios = [...scenarioQuestions].sort(() => Math.random() - 0.5).slice(0, scenarioCount);
+      
+      currentQuiz = [...shuffledMC, ...shuffledLabs, ...shuffledScenarios].sort(() => Math.random() - 0.5);
+      currentIndex = 0;
+      score = 0;
+      userAnswers = [];
+      quizStarted = true;
+      
+      renderQuestion();
+    };
+
+    function renderQuestion() {
+      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+      const question = currentQuiz[currentIndex];
+      const app = document.getElementById('app');
+      
+      const isLab = question.task !== undefined;
+      const isScenario = !isLab && question.q.startsWith("Scenario:");
+      
+      let questionType = '📝 Multiple Choice';
+      if (isLab) questionType = '🔬 Lab';
+      if (isScenario) questionType = '💼 Scenario';
+      
+      app.innerHTML = `
+        <div class="quiz-container fade-in" style="min-height: 100%; padding: 32px; max-width: 900px; margin: 0 auto;">
+          <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-weight: 600; opacity: 0.7;">Question ${currentIndex + 1} of ${currentQuiz.length}</div>
+            <div style="font-weight: 600; opacity: 0.7;">${questionType}</div>
+          </div>
+          
+          ${isScenario ? `<div class="scenario-box">
+            <div style="font-weight: 700; font-size: 18px; margin-bottom: 12px;">📋 Real-World Scenario</div>
+            <div style="line-height: 1.6;">${question.q}</div>
+          </div>` : ''}
+          
+          <div class="surface-card" style="padding: 32px; border-radius: 16px; border: 2px solid; margin-bottom: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            ${!isScenario ? `<div class="question-text" style="font-weight: 600; margin-bottom: 24px; line-height: 1.6;">${question.q}</div>` : ''}
+            
+            ${isLab ? renderLabInterface(question) : renderMCInterface(question)}
+          </div>
+          
+          <div style="display: flex; gap: 16px;">
+            <button class="primary-btn" onclick="submitAnswer()" id="submitBtn" style="flex: 1; padding: 16px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; color: white;">
+              ${config.submit_button || defaultConfig.submit_button}
+            </button>
+            <button class="secondary-btn" onclick="nextQuestion()" id="nextBtn" style="flex: 1; padding: 16px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; color: white; display: none;">
+              ${config.next_button || defaultConfig.next_button}
+            </button>
+          </div>
+          
+          <div id="feedback" style="margin-top: 16px;"></div>
+        </div>
+      `;
+      
+      currentAnswer = null;
+      onConfigChange(config);
+    }
+
+    function renderMCInterface(question) {
+      return question.options.map((opt, idx) => `
+        <div class="option-card" onclick="selectOption(${idx})" data-index="${idx}" style="padding: 16px; margin-bottom: 12px; border: 2px solid; border-radius: 8px; cursor: pointer;">
+          <strong>${String.fromCharCode(65 + idx)}.</strong> ${opt}
+        </div>
+      `).join('');
+    }
+
+    function renderLabInterface(question) {
+      return `
+        <div style="margin-bottom: 16px;">
+          <div class="lab-terminal" style="margin-bottom: 16px; padding: 16px;">
+            <div style="margin-bottom: 8px; color: #10b981; font-weight: 600;">Task:</div>
+            <div style="color: #10b981;">${question.task}</div>
+          </div>
+          <input type="text" id="labAnswer" placeholder="Enter your command here..." style="width: 100%; padding: 12px; border: 2px solid #64748b; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 14px; background: rgba(255,255,255,0.05);" onkeydown="if(event.key === 'Enter') submitAnswer()">
+        </div>
+      `;
+    }
+
+    window.selectOption = function(index) {
+      document.querySelectorAll('.option-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+      document.querySelector(`[data-index="${index}"]`).classList.add('selected');
+      currentAnswer = index;
+    };
+
+    window.submitAnswer = async function() {
+      const question = currentQuiz[currentIndex];
+      const isLab = question.task !== undefined;
+      const submitBtn = document.getElementById('submitBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const feedback = document.getElementById('feedback');
+      
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.5';
+      submitBtn.style.cursor = 'not-allowed';
+      
+      let correct = false;
+      
+      if (isLab) {
+        const userInput = document.getElementById('labAnswer').value.trim().toLowerCase();
+        const correctAnswer = question.answer.toLowerCase();
+        correct = userInput === correctAnswer;
+        
+        feedback.innerHTML = `
+          <div class="surface-card" style="padding: 16px; border-radius: 8px; border: 2px solid ${correct ? '#10b981' : '#ef4444'}; background-color: ${correct ? '#d1fae5' : '#fee2e2'};">
+            <div style="font-weight: 600; margin-bottom: 8px; color: #1e293b;">${correct ? '✓ Correct!' : '✗ Incorrect'}</div>
+            <div style="color: #1e293b;">Expected: <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', monospace;">${question.answer}</code></div>
+            ${!correct ? `<div style="color: #1e293b;">Your answer: <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', monospace;">${userInput}</code></div>` : ''}
+          </div>
+        `;
+        
+        document.getElementById('labAnswer').disabled = true;
+      } else {
+        if (currentAnswer === null) {
+          showInlineMessage("Please select an answer");
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.style.cursor = 'pointer';
+          return;
         }
+        
+        correct = currentAnswer === question.answer;
+        
+        document.querySelectorAll('.option-card').forEach((card, idx) => {
+          card.style.pointerEvents = 'none';
+          if (idx === question.answer) {
+            card.classList.add('correct');
+          } else if (idx === currentAnswer && !correct) {
+            card.classList.add('incorrect');
+          }
+        });
+        
+        feedback.innerHTML = `
+          <div class="surface-card" style="padding: 16px; border-radius: 8px; border: 2px solid ${correct ? '#10b981' : '#ef4444'}; background-color: ${correct ? '#d1fae5' : '#fee2e2'};">
+            <div style="font-weight: 600; color: #1e293b;">${correct ? '✓ Correct!' : '✗ Incorrect - The correct answer is ' + question.options[question.answer]}</div>
+          </div>
+        `;
+      }
+      
+      if (correct) score++;
+      userAnswers.push({ question: question.q, correct });
+      
+      submitBtn.style.display = 'none';
+      nextBtn.style.display = 'block';
+    };
 
-        const data = await response.json();
-        const aiReply = data.choices[0].message.content.trim();
+    window.nextQuestion = function() {
+      currentIndex++;
+      if (currentIndex < currentQuiz.length) {
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    };
 
-        // Remove "Thinking..." and add real response
-        thinkingMsg.remove();
-        addMessage(aiReply, "ai");
-
-    } catch (error) {
-        thinkingMsg.remove();
-        addMessage(`❌ Error: ${error.message}<br><br>Common fixes:<br>• Check your API key<br>• Ensure you have credits<br>• Try refreshing the page`, "ai");
-        console.error(error);
+    async function showResults() {
+      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+      const app = document.getElementById('app');
+      const percentage = Math.round((score / currentQuiz.length) * 100);
+      const passed = percentage >= 70;
+      
+      const quizData = {
+        quiz_id: `quiz_${Date.now()}`,
+        score: score,
+        total_questions: currentQuiz.length,
+        mc_count: currentQuiz.filter(q => !q.task && !q.q.startsWith("Scenario:")).length,
+        lab_count: currentQuiz.filter(q => q.task).length,
+        scenario_count: currentQuiz.filter(q => q.q.startsWith("Scenario:")).length,
+        completed_at: new Date().toISOString()
+      };
+      
+      const saveBtn = document.createElement('button');
+      saveBtn.textContent = 'Saving...';
+      saveBtn.disabled = true;
+      
+      const result = await window.dataSdk.create(quizData);
+      
+      app.innerHTML = `
+        <div class="quiz-container fade-in" style="min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px;">
+          <div class="surface-card" style="max-width: 600px; width: 100%; padding: 48px; border-radius: 16px; border: 2px solid; text-align: center; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);">
+            <div style="font-size: 64px; margin-bottom: 16px;">${passed ? '🎉' : '📚'}</div>
+            <h2 style="font-weight: 700; font-size: 32px; margin-bottom: 16px;">${passed ? 'Congratulations!' : 'Keep Studying!'}</h2>
+            <div style="font-size: 48px; font-weight: 700; margin-bottom: 8px; color: ${passed ? '#10b981' : '#ef4444'};">${percentage}%</div>
+            <div style="font-size: 24px; margin-bottom: 32px; opacity: 0.8;">${score} / ${currentQuiz.length} correct</div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 32px; text-align: left;">
+              <div class="surface-card" style="padding: 16px; border-radius: 8px; border: 1px solid rgba(139, 92, 246, 0.3);">
+                <div style="font-weight: 600; opacity: 0.7; margin-bottom: 4px;">📝 MC</div>
+                <div style="font-size: 20px; font-weight: 600;">${currentQuiz.filter(q => !q.task && !q.q.startsWith("Scenario:")).length}</div>
+              </div>
+              <div class="surface-card" style="padding: 16px; border-radius: 8px; border: 1px solid rgba(139, 92, 246, 0.3);">
+                <div style="font-weight: 600; opacity: 0.7; margin-bottom: 4px;">🔬 Labs</div>
+                <div style="font-size: 20px; font-weight: 600;">${currentQuiz.filter(q => q.task).length}</div>
+              </div>
+              <div class="surface-card" style="padding: 16px; border-radius: 8px; border: 1px solid rgba(139, 92, 246, 0.3);">
+                <div style="font-weight: 600; opacity: 0.7; margin-bottom: 4px;">💼 Scenarios</div>
+                <div style="font-size: 20px; font-weight: 600;">${currentQuiz.filter(q => q.q.startsWith("Scenario:")).length}</div>
+              </div>
+            </div>
+            
+            ${result.isOk ? '<div style="color: #10b981; margin-bottom: 16px; font-weight: 600;">✓ Results saved to your Canva Sheet</div>' : '<div style="color: #ef4444; margin-bottom: 16px;">⚠️ Could not save results</div>'}
+            
+            <button class="primary-btn" onclick="location.reload()" style="width: 100%; padding: 16px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; color: white;">
+              Take Another Quiz
+            </button>
+          </div>
+        </div>
+      `;
+      
+      onConfigChange(config);
     }
-}
 
-function addMessage(text, type) {
-    const chat = document.getElementById("chat");
-    const msg = document.createElement("div");
-    msg.className = "message " + type;
-    msg.innerHTML = text; // Use innerHTML for line breaks in errors
-    chat.appendChild(msg);
-    chat.scrollTop = chat.scrollHeight;
-    return msg; // Return so we can remove "Thinking..." later
-}
-
-// Allow sending with Enter key
-document.getElementById("userInput").addEventListener("keypress", function(e) {
-    if (e.key === "Enter") {
-        sendMessage();
+    function showInlineMessage(message) {
+      const feedback = document.getElementById('feedback');
+      if (feedback) {
+        feedback.innerHTML = `
+          <div class="surface-card" style="padding: 16px; border-radius: 8px; border: 2px solid #f59e0b; background-color: #fef3c7; color: #92400e;">
+            ${message}
+          </div>
+        `;
+        setTimeout(() => {
+          feedback.innerHTML = '';
+        }, 3000);
+      }
     }
-});
-</script>
-</body>
+
+    init();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9be71422d1b942d9',t:'MTc2ODQ5Nzk5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
