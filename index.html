@@ -1,245 +1,409 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>CompTIA A+ Core 1 & 2 Practice Exam</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CompTIA A+ Pro Study – Core 1 & Core 2</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #00d4ff;
+            --primary-dark: #0099cc;
+            --dark: #0f172a;
+            --darker: #0a0f1d;
+            --light: #e2e8f0;
+            --gray: #475569;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #0f172a;
-  color: #e5e7eb;
-  margin: 0;
-  padding: 20px;
-}
-.container {
-  max-width: 900px;
-  margin: auto;
-}
-h1, h2 {
-  text-align: center;
-}
-button {
-  padding: 10px 16px;
-  background: #2563eb;
-  border: none;
-  color: white;
-  font-size: 16px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-button:hover {
-  background: #1d4ed8;
-}
-.option {
-  background: #1e293b;
-  padding: 10px;
-  margin: 8px 0;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.option.selected {
-  background: #2563eb;
-}
-.option.correct {
-  background: #16a34a;
-}
-.option.wrong {
-  background: #dc2626;
-}
-#timer {
-  text-align: center;
-  font-size: 22px;
-  color: #f87171;
-  margin-bottom: 10px;
-}
-.hidden {
-  display: none;
-}
-</style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--darker), #111827);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 2.5rem; }
+        h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(90deg, #00d4ff, #7c3aed, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle { color: var(--gray); font-size: 1.1rem; }
+
+        .card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        label { font-weight: 600; color: var(--primary); }
+        select, input[type="number"], textarea {
+            padding: 0.75rem 1rem;
+            background: rgba(51, 65, 85, 0.6);
+            border: 1px solid var(--gray);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+        }
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0,212,255,0.2);
+        }
+
+        .generate-btn, .submit-btn {
+            grid-column: span 2;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, var(--primary), #7c3aed);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+        .generate-btn:hover, .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,212,255,0.4);
+        }
+
+        .section-title {
+            color: var(--primary);
+            margin: 1.8rem 0 1rem;
+            font-size: 1.6rem;
+            border-bottom: 2px solid rgba(0,212,255,0.3);
+            padding-bottom: 0.5rem;
+        }
+
+        .question {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .difficulty-badge {
+            padding: 0.35rem 0.9rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .level-1 { background: #10b981; color: black; }
+        .level-2 { background: #f59e0b; color: black; }
+        .level-3 { background: #ef4444; color: white; }
+        .level-4 { background: #8b5cf6; color: white; }
+
+        .options { display: flex; flex-direction: column; gap: 0.6rem; margin-left: 0.5rem; }
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.6rem;
+            border-radius: 8px;
+            background: rgba(51,65,85,0.3);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option:hover { background: rgba(51,65,85,0.6); }
+
+        input[type="radio"] { accent-color: var(--primary); }
+
+        .scenario-text { line-height: 1.6; margin-bottom: 1rem; }
+
+        #score-display {
+            text-align: center;
+            font-size: 1.5rem;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(16, 185, 129, 0.3);
+            border-radius: 12px;
+            border: 2px solid var(--success);
+        }
+
+        .feedback-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 12px;
+        }
+
+        .feedback-item {
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .feedback-good { background: rgba(16, 185, 129, 0.2); border-left: 4px solid var(--success); }
+        .feedback-partial { background: rgba(245, 158, 11, 0.2); border-left: 4px solid var(--warning); }
+        .feedback-poor { background: rgba(239, 68, 68, 0.2); border-left: 4px solid var(--danger); }
+
+        @media (max-width: 768px) {
+            .controls { grid-template-columns: 1fr; }
+            .generate-btn, .submit-btn { grid-column: span 1; }
+        }
+    </style>
 </head>
-
 <body>
-<div class="container">
+    <div class="container">
+        <header>
+            <h1>CompTIA A+ Pro Study</h1>
+            <p class="subtitle">Core 1 (220-1101) & Core 2 (220-1102) – MCQs & Scenario Feedback</p>
+        </header>
 
-<h1>CompTIA A+ Core 1 & Core 2 Practice Exam</h1>
-<div id="timer">90:00</div>
+        <div class="card">
+            <form id="quiz-form">
+                <div class="controls">
+                    <div class="form-group">
+                        <label for="core">Exam Track</label>
+                        <select id="core">
+                            <option value="both">Core 1 + Core 2</option>
+                            <option value="core1">Core 1 only</option>
+                            <option value="core2">Core 2 only</option>
+                        </select>
+                    </div>
 
-<div id="startScreen">
-  <p style="text-align:center">
-    90 questions • 90 minutes • Blueprint weighted
-  </p>
-  <div style="text-align:center">
-    <button onclick="startExam()">Start Exam</button>
-  </div>
-</div>
+                    <div class="form-group">
+                        <label for="level">IT Level</label>
+                        <select id="level">
+                            <option value="all">All Levels</option>
+                            <option value="1">Level 1 – Entry</option>
+                            <option value="2">Level 2 – Technician</option>
+                            <option value="3">Level 3 – Senior</option>
+                            <option value="4">Level 4 – Advanced</option>
+                        </select>
+                    </div>
 
-<div id="quizScreen" class="hidden">
-  <h2 id="questionNumber"></h2>
-  <p id="questionText"></p>
-  <div id="options"></div>
-  <button onclick="nextQuestion()">Next</button>
-</div>
+                    <div class="form-group">
+                        <label for="mc-count">Multiple Choice</label>
+                        <input type="number" id="mc-count" value="20" min="0" max="100">
+                    </div>
 
-<div id="resultScreen" class="hidden">
-  <h2>Exam Results</h2>
-  <p id="scoreText"></p>
-  <button onclick="location.reload()">Restart</button>
-</div>
+                    <div class="form-group">
+                        <label for="scenario-count">Scenarios (PBQs)</label>
+                        <input type="number" id="scenario-count" value="8" min="0" max="50">
+                    </div>
 
-</div>
+                    <button type="button" class="generate-btn" onclick="generateQuiz()">
+                        <i class="fas fa-bolt"></i> Generate Practice Session
+                    </button>
+                </div>
+            </form>
+        </div>
 
-<script>
-/* ---------------- TIMER ---------------- */
-let timeRemaining = 90 * 60;
-let timerInterval;
+        <div id="quiz-container"></div>
+    </div>
 
-function startTimer() {
-  timerInterval = setInterval(() => {
-    timeRemaining--;
-    updateTimer();
-    if (timeRemaining <= 0) endExam();
-  }, 1000);
-}
+    <script>
+        // Expanded content (more realistic A+ style questions)
+        const content = {
+            mc: [
+                {core:'core1', level:'1', text:'What component is known as the brain of the computer?', options:['CPU','RAM','Motherboard','Power Supply'], answer:0},
+                {core:'core1', level:'1', text:'Which type of memory loses data when power is removed?', options:['ROM','RAM','SSD','Flash'], answer:1},
+                {core:'core1', level:'2', text:'Which Ethernet cable supports 10 Gbps up to 55 meters?', options:['Cat5e','Cat6','Cat6a','Cat7'], answer:2},
+                {core:'core1', level:'2', text:'What is the standard port number for HTTPS?', options:['80','443','21','25'], answer:1},
+                {core:'core1', level:'2', text:'Which RAID level uses mirroring for redundancy?', options:['RAID 0','RAID 1','RAID 5','RAID 6'], answer:1},
+                {core:'core1', level:'3', text:'Which feature requires TPM 2.0 for Windows 11?', options:['Fast Boot','Secure Boot','Virtualization','BitLocker'], answer:1},
+                {core:'core1', level:'3', text:'What is the theoretical maximum devices on a USB 2.0 hub chain?', options:['63','127','255','512'], answer:1},
+                {core:'core2', level:'1', text:'Which command shows your IP address in Windows?', options:['ipconfig','netstat','ping','tracert'], answer:0},
+                {core:'core2', level:'1', text:'What does BitLocker primarily provide?', options:['File backup','Full disk encryption','System restore','Defragmentation'], answer:1},
+                {core:'core2', level:'2', text:'Which utility controls startup programs in Windows?', options:['msconfig','gpedit.msc','services.msc','taskmgr'], answer:0},
+                {core:'core2', level:'2', text:'What is the FIRST step in CompTIA troubleshooting methodology?', options:['Identify the problem','Establish a theory','Test the theory','Document findings'], answer:0},
+                {core:'core2', level:'2', text:'Which type of malware encrypts files and demands ransom?', options:['Adware','Ransomware','Spyware','Worm'], answer:1},
+                {core:'core2', level:'3', text:'Which PowerShell command lists running processes?', options:['Get-Process','Get-Service','Stop-Process','Get-EventLog'], answer:0},
+                {core:'core2', level:'3', text:'What protocol is used for secure remote desktop in Windows?', options:['RDP','SSH','VNC','Telnet'], answer:0},
+                {core:'core2', level:'3', text:'What is the MOST effective defense against phishing attacks?', options:['Firewall rules','Antivirus updates','User awareness training','Email filtering'], answer:2},
+                {core:'core1', level:'4', text:'Which protocol provides low-latency RDMA over Ethernet?', options:['iSCSI','FCoE','RoCEv2','NFSv4'], answer:2},
+                {core:'core2', level:'4', text:'In Intune, what enforces device compliance before allowing access?', options:['Conditional Access','App Protection Policy','Remote Lock','Autopilot'], answer:0}
+            ],
 
-function updateTimer() {
-  const m = Math.floor(timeRemaining / 60);
-  const s = timeRemaining % 60;
-  document.getElementById("timer").textContent =
-    `${m}:${s.toString().padStart(2,'0')}`;
-}
+            scenarios: [
+                {core:'core1', level:'2', text:'A user reports their monitor flickers and occasionally loses signal. Cables have been checked and are secure. List the next TWO most likely troubleshooting steps.', keywords:['update driver','update graphics','update gpu','test monitor','different monitor','swap monitor','test another display','check refresh rate']},
+                {core:'core1', level:'3', text:'After replacing a failed power supply, the system powers on and POSTs, but there is no video output and the DRAM LED remains lit on the motherboard. What is the MOST likely cause?', keywords:['reseat ram','re-seat memory','reseat memory','clean ram contacts','test ram sticks','swap ram','incompatible ram']},
+                {core:'core2', level:'2', text:'A standard user receives "Access Denied" when trying to open shared files on the network. They are not an administrator. What should you check first?', keywords:['ntfs permissions','share permissions','effective permissions','security tab','advanced sharing','icacls']},
+                {core:'core2', level:'3', text:'After a recent Windows update, users report their network printer is no longer working. Printing was fine before the update. What service should you restart first?', keywords:['print spooler','spooler service','restart spooler','services.msc spooler']},
+                {core:'core1', level:'2', text:'A laptop user says the battery is not charging even though the charger is plugged in and its LED is lit. What should you check or try next?', keywords:['charging port','try different charger','different adapter','power adapter test','check barrel connector','replace charger']},
+                {core:'core2', level:'3', text:'Multiple users receive "Your connection is not private" warnings when accessing an internal company web application after a recent certificate update.', keywords:['trusted root','install certificate','add to trusted roots','certificate trust','self-signed cert','renew cert']},
+                {core:'core2', level:'4', text:'During a Windows 11 migration, several older line-of-business applications fail compatibility checks with error code 0x800700C1.', keywords:['compatibility mode','app compat toolkit','shim','virtual machine','windows sandbox','app virtualization']},
+                {core:'core1', level:'3', text:'A workstation has no network connectivity after being moved to a new desk. The link light is on, but the IP address is 169.254.x.x. What is the MOST likely issue?', keywords:['dhcp failure','apipa','169.254','no dhcp server','check cable','switch port','vlan']},
+                {core:'core2', level:'2', text:'A user complains that their computer takes much longer to boot after installing new software. What tool should you use to investigate?', keywords:['msconfig','task manager startup','startup tab','disable startup items','services startup']},
+                {core:'core2', level:'3', text:'A user reports they clicked a suspicious email link and now the computer is running very slowly with pop-ups. What is your FIRST action?', keywords:['disconnect network','safe mode','antivirus scan','malware scan','isolate device','run windows defender']},
+                {core:'core1', level:'2', text:'A desktop PC randomly shuts down during heavy use (gaming/video editing). Temperatures seem normal according to software. What component is MOST likely failing?', keywords:['power supply','psu','capacitors','failing psu','insufficient wattage']},
+                {core:'core2', level:'3', text:'Users report blue screens with "DRIVER_IRQL_NOT_LESS_OR_EQUAL" after installing a new wireless card driver.', keywords:['rollback driver','update driver','uninstall driver','driver conflict','safe mode boot','system restore']}
+            ]
+        };
 
-/* ---------------- QUESTION POOL ---------------- */
-/* ADD MORE QUESTIONS HERE — ENGINE IS COMPLETE */
+        const levelNames = {1:'Level 1 – Entry', 2:'Level 2 – Technician', 3:'Level 3 – Senior', 4:'Level 4 – Advanced'};
 
-const QUESTIONS = [
-{
-  type: "mc",
-  domain: "Networking",
-  q: "Which port is used by HTTPS?",
-  options: ["80","21","443","25"],
-  answer: 2
-},
-{
-  type: "mc",
-  domain: "Hardware",
-  q: "Which RAID level provides fault tolerance and striping?",
-  options: ["RAID 0","RAID 1","RAID 5","RAID 10"],
-  answer: 2
-},
-{
-  type: "mc",
-  domain: "Operating Systems",
-  q: "Which Windows tool manages startup programs?",
-  options: ["Device Manager","Task Manager","Event Viewer","Disk Management"],
-  answer: 1
-},
-{
-  type: "mc",
-  domain: "Security",
-  q: "An email asking for credentials is an example of:",
-  options: ["Spoofing","Phishing","Brute force","Whaling"],
-  answer: 1
-},
-{
-  type: "lab",
-  domain: "Networking",
-  q: "Lab: Test connectivity to Google DNS",
-  answerText: "ping 8.8.8.8"
-},
-{
-  type: "lab",
-  domain: "Operating Systems",
-  q: "Lab: Open Task Manager using command line",
-  answerText: "taskmgr"
-}
-];
+        function generateQuiz() {
+            const core = document.getElementById('core').value;
+            const level = document.getElementById('level').value;
+            const mcN  = parseInt(document.getElementById('mc-count').value)   || 0;
+            const sceN = parseInt(document.getElementById('scenario-count').value) || 0;
 
-/* ---------------- BLUEPRINT WEIGHTS ---------------- */
-const CORE1 = {
-  "Mobile Devices": 0.15,
-  "Networking": 0.20,
-  "Hardware": 0.25,
-  "Virtualization & Cloud": 0.11,
-  "Troubleshooting": 0.29
-};
+            let html = '<div class="card"><h2 class="section-title">Your Practice Session</h2>';
 
-const CORE2 = {
-  "Operating Systems": 0.31,
-  "Security": 0.25,
-  "Software Troubleshooting": 0.22,
-  "Operational Procedures": 0.22
-};
+            // MC Questions
+            if (mcN > 0) {
+                let mcPool = content.mc.filter(q => (core === 'both' || q.core === core) && (level === 'all' || q.level === level));
+                mcPool = shuffle(mcPool).slice(0, mcN);
+                html += '<h3 class="section-title">Multiple Choice</h3>';
+                mcPool.forEach((q, i) => {
+                    html += `
+                    <div class="question mc-question" data-answer="${q.answer}" data-qid="${i}">
+                        <div class="question-header">
+                            <strong>MC ${i+1}</strong>
+                            <span class="difficulty-badge level-${q.level}">${levelNames[q.level]}</span>
+                        </div>
+                        <p>${q.text}</p>
+                        <div class="options">
+                            ${q.options.map((opt,j) => `
+                                <label class="option">
+                                    <input type="radio" name="mc${i}" value="${j}">
+                                    ${opt}
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>`;
+                });
+            }
 
-/* ---------------- EXAM LOGIC ---------------- */
-let examQuestions = [];
-let index = 0;
-let score = 0;
-let selected = null;
+            // Scenarios – NO reveal button anymore
+            if (sceN > 0) {
+                let scePool = content.scenarios.filter(s => (core === 'both' || s.core === core) && (level === 'all' || s.level === level));
+                scePool = shuffle(scePool).slice(0, sceN);
+                html += '<h3 class="section-title">Scenarios / PBQs – Write your answer, get feedback on submit</h3>';
+                scePool.forEach((s, i) => {
+                    html += `
+                    <div class="question scenario-question" data-keywords="${s.keywords.join('|').toLowerCase()}" data-sid="${i}">
+                        <div class="question-header">
+                            <strong>Scenario ${i+1}</strong>
+                            <span class="difficulty-badge level-${s.level}">${levelNames[s.level]}</span>
+                        </div>
+                        <div class="scenario-text">${s.text}</div>
+                        <textarea placeholder="Type your step-by-step answer / solution here..."></textarea>
+                    </div>`;
+                });
+            }
 
-function shuffle(arr) {
-  return arr.sort(() => Math.random() - 0.5);
-}
+            if (mcN + sceN > 0) {
+                html += '<button class="submit-btn" onclick="gradeQuiz()">Submit & Get Feedback</button>';
+                html += '<div id="score-display" style="display:none;"></div>';
+            } else {
+                html += '<p style="text-align:center; color:#f87171;">Please select some questions to practice.</p>';
+            }
 
-function startExam() {
-  document.getElementById("startScreen").classList.add("hidden");
-  document.getElementById("quizScreen").classList.remove("hidden");
+            html += '</div>';
+            document.getElementById('quiz-container').innerHTML = html;
+        }
 
-  examQuestions = shuffle(QUESTIONS).slice(0, 90);
-  startTimer();
-  loadQuestion();
-}
+        function gradeQuiz() {
+            let mcCorrect = 0;
+            let mcTotal = 0;
+            document.querySelectorAll('.mc-question').forEach(q => {
+                mcTotal++;
+                const selected = q.querySelector('input[type="radio"]:checked');
+                if (selected && parseInt(selected.value) === parseInt(q.dataset.answer)) mcCorrect++;
+            });
 
-function loadQuestion() {
-  selected = null;
-  const q = examQuestions[index];
-  document.getElementById("questionNumber").textContent =
-    `Question ${index + 1} of ${examQuestions.length}`;
-  document.getElementById("questionText").textContent = q.q;
+            let sceScore = 0;
+            let sceTotal = 0;
+            let feedbackHTML = '';
 
-  const optionsDiv = document.getElementById("options");
-  optionsDiv.innerHTML = "";
+            document.querySelectorAll('.scenario-question').forEach(s => {
+                sceTotal++;
+                const userText = s.querySelector('textarea').value.toLowerCase().trim();
+                const keywords = s.dataset.keywords.split('|').map(k => k.trim());
+                let matched = 0;
 
-  if (q.type === "mc") {
-    q.options.forEach((opt, i) => {
-      const div = document.createElement("div");
-      div.className = "option";
-      div.textContent = opt;
-      div.onclick = () => {
-        document.querySelectorAll(".option").forEach(o => o.classList.remove("selected"));
-        div.classList.add("selected");
-        selected = i;
-      };
-      optionsDiv.appendChild(div);
-    });
-  } else {
-    const input = document.createElement("input");
-    input.type = "text";
-    input.style.width = "100%";
-    input.style.padding = "10px";
-    input.oninput = e => selected = e.target.value.trim();
-    optionsDiv.appendChild(input);
-  }
-}
+                if (userText.length > 10) {
+                    keywords.forEach(kw => {
+                        if (userText.includes(kw)) matched++;
+                    });
+                }
 
-function nextQuestion() {
-  const q = examQuestions[index];
-  if (q.type === "mc" && selected === q.answer) score++;
-  if (q.type === "lab" && selected?.toLowerCase() === q.answerText.toLowerCase()) score++;
+                const needed = Math.max(1, Math.ceil(keywords.length * 0.4)); // ~40% of keywords for partial credit
+                let status = 'poor';
+                let comment = 'Your answer was too short or did not include key concepts. Compare to what a strong answer would include.';
 
-  index++;
-  if (index >= examQuestions.length) endExam();
-  else loadQuestion();
-}
+                if (matched >= needed * 1.5) {
+                    status = 'good';
+                    sceScore += 1;
+                    comment = 'Strong answer! You hit the most important points.';
+                } else if (matched >= needed) {
+                    status = 'partial';
+                    sceScore += 0.5;
+                    comment = 'Good effort — you covered some key steps, but missed a few critical ones.';
+                }
 
-function endExam() {
-  clearInterval(timerInterval);
-  document.getElementById("quizScreen").classList.add("hidden");
-  document.getElementById("resultScreen").classList.remove("hidden");
-  document.getElementById("scoreText").textContent =
-    `Score: ${score} / ${examQuestions.length}`;
-}
-</script>
+                feedbackHTML += `
+                    <div class="feedback-item feedback-${status}">
+                        <strong>Scenario ${s.dataset.sid} Feedback (${status === 'good' ? 'Great' : status === 'partial' ? 'Partial' : 'Needs Work'})</strong><br>
+                        ${comment}
+                    </div>`;
+            });
+
+            const totalQuestions = mcTotal + sceTotal;
+            const totalPoints = mcCorrect + sceScore;
+            const percent = totalQuestions > 0 ? Math.round((totalPoints / totalQuestions) * 100) : 0;
+
+            const display = document.getElementById('score-display');
+            display.style.display = 'block';
+            display.innerHTML = `
+                <strong>Overall: ${Math.round(totalPoints)} / ${totalQuestions} (${percent}%)</strong><br>
+                <div>Multiple Choice: ${mcCorrect} correct out of ${mcTotal}</div>
+                <div>Scenarios: ${sceScore.toFixed(1)} points out of ${sceTotal} (keyword-based evaluation)</div>
+
+                <div class="feedback-section">
+                    <h3>Scenario Feedback Details</h3>
+                    ${feedbackHTML || '<p>No scenarios were answered.</p>'}
+                </div>
+
+                <small style="display:block; margin-top:1rem; color:var(--gray);">
+                    Scenario scoring is automatic and based on key phrases. Write detailed, step-by-step answers for best results.
+                </small>
+            `;
+
+            display.scrollIntoView({behavior: 'smooth'});
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+    </script>
 </body>
 </html>
